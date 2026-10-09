@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' file: data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>RetroHub</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-input="kb">
+  <div id="bg"></div>
+  <div id="bgShade"></div>
+
+  <header class="topbar">
+    <div class="brand"><span class="brand-dot"></span>RETROHUB</div>
+    <nav id="tabs">
+      <button class="tab active" data-filter="all">Tümü</button>
+      <button class="tab" data-filter="recent">Son Oynanan</button>
+      <button class="tab" data-filter="fav">★ Favoriler</button>
+      <button class="tab" data-filter="gamecube">GameCube</button>
+      <button class="tab" data-filter="ps2">PS2</button>
+    </nav>
+    <div class="top-right">
+      <input id="search" type="search" placeholder="Ara ( / )" />
+      <span id="padStatus" class="pad-status" title="Kontrolcü">🎮</span>
+      <span id="clock" class="clock"></span>
+      <button id="btnRandom" class="icon-btn" title="Şanslı oyun">🎲</button>
+      <button id="btnFull" class="icon-btn" title="Tam ekran (F11)">⛶</button>
+      <button id="btnSettings" class="icon-btn" title="Ayarlar (S / Start)">⚙</button>
+    </div>
+  </header>
+
+  <main id="home">
+    <section id="hero" class="hero hidden">
+      <div class="hero-info">
+        <div id="heroBadges" class="chips"></div>
+        <h1 id="heroTitle"></h1>
+        <p id="heroMeta" class="hero-meta"></p>
+        <div class="hero-actions">
+          <button id="heroPlay" class="btn primary big focusable"><span class="key">A</span> Oyna</button>
+          <button id="heroFav" class="btn big focusable"><span class="key">X</span> <span id="heroFavText">Favori</span></button>
+          <button id="heroDetail" class="btn big focusable"><span class="key">Y</span> Detay</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="railWrap" class="rail-wrap hidden">
+      <div id="rail" class="rail"></div>
+    </section>
+
+    <section id="emptyState" class="empty hidden">
+      <h2>Hoş geldin! 3 adımda hazırsın</h2>
+      <div class="steps">
+        <div class="step"><b>1</b><p>ROM klasörlerini seç</p><button class="btn primary" id="emptyFolders">Klasör Seç</button></div>
+        <div class="step"><b>2</b><p>Emülatörleri otomatik bul</p><button class="btn primary" id="emptyDetect">Otomatik Bul</button></div>
+        <div class="step"><b>3</b><p>Oyunlarını tara</p><button class="btn primary" id="emptyScan">Tara</button></div>
+      </div>
+      <p class="muted" id="emptyNote"></p>
+    </section>
+  </main>
+
+  <!-- Oyun açıkken görünen katman -->
+  <div id="playing" class="playing hidden">
+    <div class="spinner"></div>
+    <h2 id="playingTitle"></h2>
+    <p id="playingTime">0 sn</p>
+    <p class="muted">Oyunu kapatınca buraya döneceksin.</p>
+  </div>
+
+  <!-- Detay çekmecesi -->
+  <aside id="drawer" class="drawer hidden">
+    <div id="drawerContent"></div>
+  </aside>
+
+  <!-- Ayarlar -->
+  <section id="settings" class="settings hidden">
+    <div class="settings-head">
+      <h2>Ayarlar</h2>
+      <button id="closeSettings" class="btn focusable"><span class="key">B</span> Geri</button>
+    </div>
+    <div class="settings-body">
+
+      <div class="card">
+        <h3>📁 Kütüphane</h3>
+        <div class="row"><label>GameCube klasörü</label><div class="pick"><input id="gcFolder" readonly placeholder="Seçilmedi" /><button class="btn focusable" data-pick="gcFolder" data-type="folder">Seç</button></div></div>
+        <div class="row"><label>PS2 klasörü</label><div class="pick"><input id="ps2Folder" readonly placeholder="Seçilmedi" /><button class="btn focusable" data-pick="ps2Folder" data-type="folder">Seç</button></div></div>
+        <div class="row desktop-only"><label>Kapak resimleri (opsiyonel, oyunadı.jpg)</label><div class="pick"><input id="coverFolder" readonly placeholder="Seçilmedi" /><button class="btn focusable" data-pick="coverFolder" data-type="folder">Seç</button></div></div>
+        <div class="toggle-row"><span>Otomatik tara (açılışta ve klasör değişince)</span><button class="toggle focusable" data-toggle="autoScan"></button></div>
+        <div class="toggle-row desktop-only"><span>Windows ile birlikte başlat</span><button class="toggle focusable" data-toggle="startWithWindows"></button></div>
+        <button id="scanBtn" class="btn primary focusable">🔄 Şimdi Tara</button>
+      </div>
+
+      <div class="card desktop-only">
+        <h3>🕹 Emülatörler</h3>
+        <div class="row"><label>Dolphin (GameCube)</label><div class="pick"><input id="dolphinPath" readonly placeholder="Seçilmedi" /><button class="btn focusable" data-pick="dolphinPath" data-type="exe">Seç</button></div></div>
+        <div class="row"><label>PCSX2 (PS2)</label><div class="pick"><input id="pcsx2Path" readonly placeholder="Seçilmedi" /><button class="btn focusable" data-pick="pcsx2Path" data-type="exe">Seç</button></div></div>
+        <button id="detectBtn" class="btn primary focusable">🔎 Otomatik Bul</button>
+      </div>
+
+      <div class="card desktop-only">
+        <h3>☁ Bulut Kayıt (çok basit)</h3>
+        <p class="muted small">Google Drive (masaüstü uygulaması), Dropbox veya OneDrive klasörü içinde bir klasör seç. Hepsi bu — anahtar, giriş, hesap bağlama yok. Kayıtlar oyun açılırken indirilir, kapanınca yüklenir.</p>
+        <div class="row"><label>Bulut klasörü</label><div class="pick"><input id="cloudFolder" readonly placeholder="Seçilmedi" /><button class="btn focusable" data-pick="cloudFolder" data-type="folder">Seç</button></div></div>
+        <div class="toggle-row"><span>Otomatik eşitle</span><button class="toggle focusable" data-toggle="autoSync"></button></div>
+        <button id="cloudNow" class="btn focusable">⇅ Şimdi Eşitle</button>
+        <p class="muted small" id="saveInfo"></p>
+      </div>
+
+      <div class="card desktop-only">
+        <h3>⚡ FPS ve Performans</h3>
+        <p class="muted small">Açıkken oyun başlarken otomatik uygulanır: emülatör performans profili + (varsa) oyuna özel 60 FPS kodu.</p>
+        <div class="toggle-row"><span>Otomatik FPS Unlocker</span><button class="toggle focusable" data-toggle="autoFps"></button></div>
+        <div class="toggle-row"><span>Emülatörü tam ekran aç</span><button class="toggle focusable" data-toggle="fullscreenEmu"></button></div>
+        <div class="toggle-row"><span>Oyun açıkken RetroHub'ı gizle</span><button class="toggle focusable" data-toggle="hideOnPlay"></button></div>
+        <div class="toggle-row"><span>RetroHub tam ekran başlasın</span><button class="toggle focusable" data-toggle="startFullscreen"></button></div>
+        <div class="toggle-row"><span>Menü sesleri</span><button class="toggle focusable" data-toggle="sounds"></button></div>
+        <div class="row"><label>Kendi kod klasörün (opsiyonel)</label><div class="pick"><input id="fpsCodesFolder" readonly placeholder="Seçilmedi" /><button class="btn focusable" data-pick="fpsCodesFolder" data-type="folder">Seç</button></div></div>
+      </div>
+
+      <div class="card desktop-only">
+        <h3>🌐 Kod Deposu (internetten)</h3>
+        <p class="muted small">60 FPS kodları oyunun ID'sine göre internetten çekilir; yeni oyun eklenince uygulamayı güncellemen gerekmez. PS2 için PCSX2'nin resmi yama paketi kullanılır. GameCube kodları senin depondan gelir (index.json adresi). Kod bellek adreslerini değiştirdiği için yalnızca <b>aynı bölgenin</b> (USA/PAL/JAP) kodu kurulur.</p>
+        <div class="toggle-row"><span>PCSX2 resmi yama paketini kullan</span><button class="toggle focusable" data-toggle="usePcsx2Patches"></button></div>
+        <div class="toggle-row"><span>Topluluk 50/60 FPS yamalarını kullan (yüzlerce oyun, USA dahil)</span><button class="toggle focusable" data-toggle="useCommunityPatches"></button></div>
+        <div class="row"><label>Kendi depo adresi (index.json, https)</label><div class="pick"><input id="codeRepoUrl" class="editable" placeholder="https://raw.githubusercontent.com/.../index.json" /></div></div>
+        <button id="codesRefresh" class="btn primary focusable">⟳ Kodları Şimdi Güncelle</button>
+      </div>
+
+      <div class="card wide desktop-only">
+        <h3>🩹 Otomatik Türkçe Yama</h3>
+        <div class="row"><label>Yama dosyaları klasörü (.ppf / .xdelta)</label><div class="pick"><input id="patchesFolder" readonly placeholder="Seçilmedi" /><button class="btn focusable" data-pick="patchesFolder" data-type="folder">Seç</button></div></div>
+        <div class="row"><label>xdelta3.exe (sadece .xdelta için)</label><div class="pick"><input id="xdelta3Path" readonly placeholder="Seçilmedi" /><button class="btn focusable" data-pick="xdelta3Path" data-type="exe">Seç</button></div></div>
+        <button id="autoScanBtn" class="btn primary focusable">🔍 Eşleşmeleri Bul</button>
+        <div id="autoMatchList" class="matches"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Onay / bilgi penceresi -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <h3 id="modalTitle"></h3>
+      <p id="modalText"></p>
+      <div id="modalButtons" class="modal-buttons"></div>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts"></div>
+
+  <footer id="hints" class="hints"></footer>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

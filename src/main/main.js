@@ -1,0 +1,282 @@
+const { app, BrowserWindow, ipcMain, dialog, net } = require('electron');
+const path = require('path');
+const fs = require('fs');
+
+const store = require('./store');
+const scanner = require('./scanner');
+const launcher = require('./launcher');
+const patcher = require('./patcher');
+const sync = require('./sync');
+const cheats = require('./cheats');
+const fps = require('./fps');
+const paths = require('./paths');
+const codes = require('./codes');
+
+let mainWindow;
+let playingId = null;
+
+function createWindow() {
+  const s = store.get('settings');
+  mainWindow = new BrowserWindow({
+    width: 1280,
+    height: 800,
+    minWidth: 960,
+    minHeight: 600,
+    backgroundColor: '#07080f',
+    icon: path.join(__dirname, '..', '..', 'assets', 'icon.png'),
+    title: 'RetroHub',
+    autoHideMenuBar: true,
+    fullscreen: !!s.startFullscreen,
+    webPreferences: {
+      preload: path.join(__dirname, '..', 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      backgroundThrottling: false // arka planda da gamepad/sure dogru calissin
+    }
+  });
+  mainWindow.setMenuBarVisibility(false);
+  mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+}
+
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.focus(); }
+  });
+  app.whenReady().then(() => {
+    createWindow();
+    initCodeRepo();
+    applyLoginItem(store.get('settings'));
+    mainWindow.webContents.once('did-finish-load', () => { autoScan('acilis'); refreshCodes(false); });
+    watchLibraryFolders();
+  });
+}
+
+app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+
+
+// ---------- Kod deposu (internetten) ----------
+let codeRepo;
+function fetchBuffer(url) {
+  return new Promise((resolve, reject) => {
+    if (!/^https:\/\//i.test(url)) return reject(new Error('Sadece https adresleri desteklenir'));
+    const req = net.request({ url, redirect: 'follow' });
+    const chunks = [];
+    const timer = setTimeout(() => { req.abort(); reject(new Error('Zaman asimi')); }, 60000);
+    req.on('response', (res) => {
+      if (res.statusCode !== 200) { clearTimeout(timer); return reject(new Error('HTTP ' + res.statusCode)); }
+      res.on('data', (c) => chunks.push(c));
+      res.on('end', () => { clearTimeout(timer); resolve(Buffer.concat(chunks)); });
+      res.on('error', (e) => { clearTimeout(timer); reject(e); });
+    });
+    req.on('error', (e) => { clearTimeout(timer); reject(e); });
+    req.end();
+  });
+}
+function initCodeRepo() {
+  codeRepo = codes.create({ cacheDir: path.join(app.getPath('userData'), 'codes-cache'), fetchBuffer });
+  fps.setRepo(codeRepo);
+}
+async function refreshCodes(force) {
+  try {
+    const r = await codeRepo.updateIndex(store.get('settings'), { force });
+    if (force) {
+      if (r.errors.length) toast(r.errors.join(' | '), 'warn');
+      else toast(`Kod deposu guncellendi (${r.index} kayit, ${r.ps2} PS2 yamasi)`, 'ok');
+    }
+    return r;
+  } catch (err) {
+    if (force) toast('Kod deposu guncellenemedi: ' + err.message, 'warn');
+    return { errors: [err.message] };
+  }
+}
+
+// ---------- Otomatik tarama ----------
+let scanTimer = null;
+let watchers = [];
+function autoScan(reason) {
+  const s = store.get('settings');
+  if (!s.autoScan || (!s.gcFolder && !s.ps2Folder)) return;
+  try {
+    const before = Object.keys(store.get('games')).length;
+    const list = scanner.syncLibrary();
+    send('library:changed', { count: list.length, added: Math.max(0, list.length - before), reason });
+  } catch (err) { toast('Otomatik tarama basarisiz: ' + err.message, 'warn'); }
+}
+function watchLibraryFolders() {
+  watchers.forEach((w) => { try { w.close(); } catch (e) { /* kapali */ } });
+  watchers = [];
+  const s = store.get('settings');
+  for (const dir of [s.gcFolder, s.ps2Folder]) {
+    if (!dir || !fs.existsSync(dir)) continue;
+    try {
+      // recursive: Windows ve macOS'ta var; Linux'ta sadece ust klasoru izler
+      const w = fs.watch(dir, { recursive: true }, () => {
+        clearTimeout(scanTimer);
+        scanTimer = setTimeout(() => autoScan('klasor degisti'), 3000); // kopyalama bitsin diye bekle
+      });
+      w.on('error', () => {});
+      watchers.push(w);
+    } catch (e) { /* izleme desteklenmiyorsa acilis taramasi yeterli */ }
+  }
+}
+function applyLoginItem(s) {
+  if (!app.isPackaged) return; // gelistirme modunda kayit etme
+  try { app.setLoginItemSettings({ openAtLogin: !!s.startWithWindows }); } catch (e) { /* sessiz */ }
+}
+
+function send(channel, payload) {
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send(channel, payload);
+}
+const toast = (message, type = 'info') => send('toast', { message, type });
+
+function getGame(id) {
+  const g = store.get('games')[id];
+  if (!g) throw new Error('Oyun bulunamadi');
+  return g;
+}
+function updateGame(id, patch) {
+  const games = store.get('games');
+  if (!games[id]) return null;
+  games[id] = { ...games[id], ...patch };
+  store.set('games', games);
+  return games[id];
+}
+
+// ---------- Ayarlar ----------
+ipcMain.handle('settings:get', () => store.get('settings'));
+ipcMain.handle('settings:set', (_e, partial) => {
+  store.set('settings', { ...store.get('settings'), ...partial });
+  const s = store.get('settings');
+  if ('gcFolder' in partial || 'ps2Folder' in partial || 'autoScan' in partial) {
+    watchLibraryFolders();
+    if ('gcFolder' in partial || 'ps2Folder' in partial) autoScan('klasor secildi');
+  }
+  if ('startWithWindows' in partial) applyLoginItem(s);
+  if ('codeRepoUrl' in partial || 'pcsx2PatchesUrl' in partial || 'usePcsx2Patches' in partial || 'useCommunityPatches' in partial) refreshCodes(true);
+  return s;
+});
+ipcMain.handle('settings:pickFolder', async () => {
+  const res = await dialog.showOpenDialog(mainWindow, { properties: ['openDirectory'] });
+  return res.canceled ? null : res.filePaths[0];
+});
+ipcMain.handle('settings:pickFile', async (_e, filters) => {
+  const res = await dialog.showOpenDialog(mainWindow, { properties: ['openFile'], filters: filters || [] });
+  return res.canceled ? null : res.filePaths[0];
+});
+ipcMain.handle('setup:autodetect', () => {
+  const found = paths.detectEmulators();
+  const s = store.get('settings');
+  const patch = {};
+  if (!s.dolphinPath && found.dolphinPath) patch.dolphinPath = found.dolphinPath;
+  if (!s.pcsx2Path && found.pcsx2Path) patch.pcsx2Path = found.pcsx2Path;
+  if (Object.keys(patch).length) store.set('settings', { ...s, ...patch });
+  return { found, applied: patch };
+});
+
+// ---------- Pencere ----------
+ipcMain.handle('app:toggleFullscreen', () => {
+  mainWindow.setFullScreen(!mainWindow.isFullScreen());
+  return mainWindow.isFullScreen();
+});
+ipcMain.handle('app:quit', () => app.quit());
+
+// ---------- Kutuphane ----------
+ipcMain.handle('library:scan', () => scanner.syncLibrary());
+ipcMain.handle('library:list', () => Object.values(store.get('games')));
+ipcMain.handle('game:toggleFav', (_e, id) => {
+  const g = getGame(id);
+  return updateGame(id, { favorite: !g.favorite });
+});
+ipcMain.handle('game:setAutoFps', (_e, { id, value }) => updateGame(id, { autoFps: !!value }));
+ipcMain.handle('game:identify', (_e, id) => fps.identify(getGame(id)));
+ipcMain.handle('codes:refresh', () => refreshCodes(true));
+
+// ---------- Oynatma ----------
+ipcMain.handle('game:play', async (_e, gameId) => {
+  const game = getGame(gameId);
+  if (playingId) throw new Error('Zaten acik bir oyun var.');
+  const settings = store.get('settings');
+
+  if (settings.cloudFolder && settings.autoSync) {
+    try {
+      const n = sync.syncDown();
+      if (n) toast(`${n} kayit buluttan alindi`, 'ok');
+    } catch (err) {
+      toast('Bulut senkronu atlandi: ' + err.message, 'warn');
+    }
+  }
+
+  try {
+    (await fps.prepare(game, settings)).forEach((n) => toast(n, 'info'));
+  } catch (err) {
+    toast('FPS ayari uygulanamadi: ' + err.message, 'warn');
+  }
+
+  const child = launcher.playGame(game, {
+    onTick: (elapsed) => send('game:tick', { gameId, elapsed }),
+    onError: (msg) => toast(msg, 'err'),
+    onExit: (elapsed, updated, failed) => {
+      playingId = null;
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.show();
+        mainWindow.focus();
+      }
+      send('game:exit', { gameId, elapsed, failed: !!failed });
+      if (settings.cloudFolder && settings.autoSync) {
+        try {
+          const n = sync.syncUp();
+          if (n) toast(`${n} kayit buluta yuklendi`, 'ok');
+        } catch (err) {
+          toast('Buluta yuklenemedi: ' + err.message, 'warn');
+        }
+      }
+    }
+  });
+
+  if (!child) return false;
+  playingId = gameId;
+  if (settings.hideOnPlay && mainWindow) mainWindow.minimize();
+  return true;
+});
+
+// ---------- Yama ----------
+ipcMain.handle('patch:apply', async (_e, { gameId, patchFilePath }) =>
+  patcher.applyPatch(getGame(gameId), patchFilePath));
+ipcMain.handle('patch:restore', (_e, gameId) => patcher.restoreOriginal(getGame(gameId)));
+ipcMain.handle('patch:autoScan', () => {
+  const s = store.get('settings');
+  return patcher.findAutoMatches(s.patchesFolder, Object.values(store.get('games')));
+});
+ipcMain.handle('patch:autoApply', async (_e, matches) => {
+  const results = [];
+  for (const m of matches) {
+    try {
+      await patcher.applyPatch(getGame(m.gameId), m.patchFilePath, m.patchFileName);
+      results.push({ ...m, ok: true });
+    } catch (err) {
+      results.push({ ...m, ok: false, error: err.message });
+    }
+  }
+  return results;
+});
+
+// ---------- Elle kod kurma (ileri duzey; normalde otomatik) ----------
+ipcMain.handle('cheats:installGecko', (_e, { gameId, codeFilePath }) => {
+  const g = getGame(gameId);
+  if (g.platform !== 'gamecube') throw new Error('Gecko kodlari sadece GameCube icindir');
+  return cheats.installGeckoCode(g, codeFilePath);
+});
+ipcMain.handle('cheats:installPnach', (_e, { pnachFilePath }) => cheats.installPnach(pnachFilePath));
+
+// ---------- Bulut kayit (klasor tabanli) ----------
+ipcMain.handle('cloud:syncNow', () => {
+  const down = sync.syncDown();
+  const up = sync.syncUp();
+  return { down, up };
+});
+ipcMain.handle('cloud:localSaves', () => sync.listLocalSaves());

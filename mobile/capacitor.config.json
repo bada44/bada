@@ -1,0 +1,7 @@
+{
+  "appId": "com.retrohub.app",
+  "appName": "RetroHub",
+  "webDir": "www",
+  "backgroundColor": "#07080f",
+  "android": { "allowMixedContent": false }
+}
