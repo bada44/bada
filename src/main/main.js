@@ -11,6 +11,7 @@ const cheats = require('./cheats');
 const fps = require('./fps');
 const paths = require('./paths');
 const codes = require('./codes');
+const covers = require('./covers');
 
 let mainWindow;
 let playingId = null;
@@ -47,6 +48,7 @@ if (!gotLock) {
   });
   app.whenReady().then(() => {
     createWindow();
+    paths.configure(store.get('settings'));
     initCodeRepo();
     applyLoginItem(store.get('settings'));
     mainWindow.webContents.once('did-finish-load', () => { autoScan('acilis'); refreshCodes(false); });
@@ -76,7 +78,30 @@ function fetchBuffer(url) {
     req.end();
   });
 }
+let coverRepo;
+let coverRunning = false;
+// Kapagi olmayan oyunlar icin arka planda kapak indirir (internet yoksa sessizce vazgecer).
+async function fetchMissingCovers() {
+  if (coverRunning || !coverRepo) return;
+  coverRunning = true;
+  try {
+    let changed = 0;
+    const games = Object.values(store.get('games')).filter((g) => !g.cover);
+    for (const g of games) {
+      let region = null;
+      try { region = fps.identify(g).region; } catch (e) { /* kimlik okunamadi */ }
+      const p = await coverRepo.fetchFor(g, region).catch(() => null);
+      if (p) {
+        const all = store.get('games');
+        if (all[g.id]) { all[g.id].cover = p; store.set('games', all); changed++; }
+        if (changed % 5 === 0) send('library:changed', { count: Object.keys(all).length, added: 0, reason: 'kapak' });
+      }
+    }
+    if (changed) send('library:changed', { count: Object.keys(store.get('games')).length, added: 0, reason: 'kapak' });
+  } finally { coverRunning = false; }
+}
 function initCodeRepo() {
+  coverRepo = covers.create({ dir: path.join(app.getPath('userData'), 'covers'), fetchBuffer });
   codeRepo = codes.create({ cacheDir: path.join(app.getPath('userData'), 'codes-cache'), fetchBuffer });
   fps.setRepo(codeRepo);
 }
@@ -104,6 +129,7 @@ function autoScan(reason) {
     const before = Object.keys(store.get('games')).length;
     const list = scanner.syncLibrary();
     send('library:changed', { count: list.length, added: Math.max(0, list.length - before), reason });
+    fetchMissingCovers();
   } catch (err) { toast('Otomatik tarama basarisiz: ' + err.message, 'warn'); }
 }
 function watchLibraryFolders() {
@@ -151,6 +177,7 @@ ipcMain.handle('settings:get', () => store.get('settings'));
 ipcMain.handle('settings:set', (_e, partial) => {
   store.set('settings', { ...store.get('settings'), ...partial });
   const s = store.get('settings');
+  if ('dolphinPath' in partial || 'pcsx2Path' in partial) paths.configure(s);
   if ('gcFolder' in partial || 'ps2Folder' in partial || 'autoScan' in partial) {
     watchLibraryFolders();
     if ('gcFolder' in partial || 'ps2Folder' in partial) autoScan('klasor secildi');
@@ -211,7 +238,10 @@ ipcMain.handle('game:play', async (_e, gameId) => {
   }
 
   try {
-    (await fps.prepare(game, settings)).forEach((n) => toast(n, 'info'));
+    const notes = await fps.prepare(game, settings);
+    notes.forEach((n) => toast(n, /UYARI|indirilemedi|okunamadi/.test(n) ? 'warn' : 'info'));
+    const gs = store.get('games');
+    if (gs[gameId]) { gs[gameId].fpsReport = { at: new Date().toISOString(), notes }; store.set('games', gs); send('library:changed', { count: Object.keys(gs).length, added: 0, reason: 'fps' }); }
   } catch (err) {
     toast('FPS ayari uygulanamadi: ' + err.message, 'warn');
   }

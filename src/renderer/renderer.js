@@ -6,7 +6,7 @@ const TABS = ['all', 'recent', 'fav', 'gamecube', 'ps2'];
 const state = {
   games: [], filter: 'all', query: '', sel: 0,
   settings: {}, playing: null, drawerGameId: null,
-  modalResolve: null, padLockUntil: 0
+  modalResolve: null, padLockUntil: 0, view: 'library', sort: 'name', pageGameId: null
 };
 
 // ---------- Yardimcilar ----------
@@ -142,6 +142,7 @@ function renderAll() {
   updateHero();
   scrollToSel(false);
   $$('#tabs .tab').forEach((b) => b.classList.toggle('active', b.dataset.filter === state.filter));
+  if (typeof renderSteam === 'function') renderSteam();
 }
 
 function updateSelection() {
@@ -173,6 +174,18 @@ function updateHero() {
 // ---------- Oyun islemleri ----------
 async function play(g = currentGame()) {
   if (!g || state.playing) return;
+  if (!isMobile()) {
+    const s = await api.settings.get();
+    state.settings = s;
+    const need = g.platform === 'gamecube' ? s.dolphinPath : s.pcsx2Path;
+    if (!need) {
+      const go = await ask('Emülatör bulunamadı',
+        `${g.platform === 'gamecube' ? 'Dolphin' : 'PCSX2'} yolu ayarlı değil. Ayarlar'da "Otomatik Bul"a basabilir ya da .exe dosyasını elle seçebilirsin.`,
+        [{ label: 'Ayarlara git', value: true, primary: true }, { label: 'Vazgeç', value: false }]);
+      if (go) openSettings('emus');
+      return;
+    }
+  }
   state.playing = g.id;
   $('#playingTitle').textContent = g.title;
   $('#playingTime').textContent = 'Başlatılıyor...';
@@ -269,6 +282,7 @@ function codeStatusHtml(i) {
 }
 function closeDrawer() { $('#drawer').classList.add('hidden'); state.drawerGameId = null; }
 
+function refreshDetail(id) { return state.pageGameId ? openGamePage(id) : openDrawer(id); }
 async function drawerAction(action, g) {
   try {
     if (action === 'close') return closeDrawer();
@@ -276,7 +290,7 @@ async function drawerAction(action, g) {
     if (action === 'fav') return toggleFav(g);
     if (action === 'fps') {
       await api.game.setAutoFps(g.id, g.autoFps === false);
-      await loadLibrary(g.id); return openDrawer(g.id);
+      await loadLibrary(g.id); return refreshDetail(g.id);
     }
     if (action === 'patch') {
       const f = await api.settings.pickFile([{ name: 'Yama', extensions: ['ppf', 'xdelta', 'vcdiff'] }]);
@@ -287,12 +301,12 @@ async function drawerAction(action, g) {
       toast('Yama uygulanıyor...');
       await api.patch.apply(g.id, f);
       toast('Yama uygulandı!', 'ok');
-      await loadLibrary(g.id); return openDrawer(g.id);
+      await loadLibrary(g.id); return refreshDetail(g.id);
     }
     if (action === 'restore') {
       if (!(await confirmBox('Orijinale dön', 'Oyun yamasız haline döndürülsün mü?'))) return;
       await api.patch.restore(g.id);
-      await loadLibrary(g.id); return openDrawer(g.id);
+      await loadLibrary(g.id); return refreshDetail(g.id);
     }
     if (action === 'code') {
       if (g.platform === 'gamecube') {
@@ -313,13 +327,17 @@ async function drawerAction(action, g) {
 }
 
 // ---------- Ayarlar ----------
-async function openSettings() {
+async function openSettings(cat) {
   await loadSettings();
+  if (typeof setSettingsCat === 'function') setSettingsCat(typeof cat === 'string' ? cat : (state.setCat || 'library'));
   $('#settings').classList.remove('hidden');
   $$('#settings .focusable')[0]?.focus();
   beep(500);
 }
-function closeSettings() { $('#settings').classList.add('hidden'); }
+function closeSettings() {
+  $('#settings').classList.add('hidden');
+  if (typeof renderStatus === 'function') renderStatus();
+}
 
 async function loadSettings() {
   state.settings = await api.settings.get();
@@ -506,6 +524,7 @@ function act(name) {
     else if (name === 'back' || name === 'detail') closeDrawer();
     return;
   }
+  if (state.view === 'library') return steamAct(name);
   // home
   if (document.activeElement === $('#search')) {
     if (name === 'back') $('#search').blur();
@@ -541,11 +560,14 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'F11') { e.preventDefault(); api.app.toggleFullscreen(); return; }
   if (state.playing) return;
   if (document.activeElement?.matches('input.editable')) { if (e.key === 'Escape' || e.key === 'Enter') document.activeElement.blur(); return; }
+  if (document.activeElement?.matches('select, input[type=range]')) return;
   setInputMode('kb');
-  const typing = document.activeElement === $('#search');
-  if (e.key === '/' && !typing && layer() === 'home') { e.preventDefault(); $('#search').focus(); return; }
-  if (typing && e.key !== 'Escape' && e.key !== 'Enter') return;
-  if (typing && e.key === 'Enter') { $('#search').blur(); return; }
+  const typing = document.activeElement === $('#search') || document.activeElement === $('#sSearch');
+  const searchBox = state.view === 'library' ? $('#sSearch') : $('#search');
+  if (e.key === '/' && !typing && layer() === 'home') { e.preventDefault(); searchBox.focus(); return; }
+  if (typing && e.key === 'Escape') { document.activeElement.blur(); return; }
+  if (typing && e.key !== 'Enter') return;
+  if (typing && e.key === 'Enter') { document.activeElement.blur(); return; }
   const name = KEYS[e.key];
   if (!name) return;
   if (name === 'accept' && document.activeElement?.matches('button') && layer() !== 'home') return; // buton kendi click'ini tetikler
@@ -608,6 +630,7 @@ function renderHints() {
 (async function init() {
   state.settings = await api.settings.get();
   renderHints();
+  if (typeof initSteam === 'function') initSteam();
   if (!state.settings.dolphinPath && !state.settings.pcsx2Path) {
     try { await api.setup.autodetect(); state.settings = await api.settings.get(); } catch (e) { /* sessiz */ }
   }

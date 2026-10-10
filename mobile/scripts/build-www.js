@@ -6,7 +6,7 @@ const src = path.join(root, '..', 'src', 'renderer');
 const out = path.join(root, 'www');
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
-for (const f of ['styles.css', 'renderer.js']) fs.copyFileSync(path.join(src, f), path.join(out, f));
+for (const f of ['styles.css', 'renderer.js', 'steam.js']) fs.copyFileSync(path.join(src, f), path.join(out, f));
 fs.copyFileSync(path.join(root, 'bridge', 'bridge.js'), path.join(out, 'bridge.js'));
 let html = fs.readFileSync(path.join(src, 'index.html'), 'utf8');
 if (!html.includes('src="renderer.js"')) throw new Error('index.html beklenen yapida degil');

@@ -128,6 +128,15 @@
     });
   }
 
+  // Android geri tusu: acik sayfa/pencere varsa onu kapat, yoksa uygulamadan cik.
+  if (AppPlugin) {
+    AppPlugin.addListener('backButton', () => {
+      const open = document.querySelector('#modal:not(.hidden), #settings:not(.hidden), #drawer:not(.hidden), #sPage:not(.hidden)');
+      if (open) document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      else if (AppPlugin.exitApp) AppPlugin.exitApp();
+    });
+  }
+
   const noPatch = () => { throw new Error('Mobilde Turkce yama desteklenmiyor (masaustu uygulamasini kullan).'); };
 
   window.retrohub = {

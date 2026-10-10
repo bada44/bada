@@ -21,8 +21,36 @@ function findUserDir(name) {
   return path.join(docsRoots[0], name);
 }
 
-const dolphinUserDir = () => findUserDir('Dolphin Emulator');
-const pcsx2Dir = () => findUserDir('PCSX2');
+// Ayarlardaki emulator yollari (main.js verir). Portable kurulumlari tanimak icin gerekli.
+let emuPaths = {};
+function configure(settings) { emuPaths = { dolphinPath: settings.dolphinPath, pcsx2Path: settings.pcsx2Path }; }
+
+// Dolphin: exe yaninda portable.txt varsa veri klasoru "User"; yoksa Belgeler/AppData.
+function dolphinUserDir() {
+  const exe = emuPaths.dolphinPath;
+  if (exe) {
+    const d = path.dirname(exe);
+    if (fs.existsSync(path.join(d, 'portable.txt'))) return path.join(d, 'User');
+  }
+  return findUserDir('Dolphin Emulator');
+}
+// PCSX2: exe yaninda portable.ini (veya portable.txt) varsa veri klasoru exe klasoru.
+function pcsx2Dir() {
+  const exe = emuPaths.pcsx2Path;
+  if (exe) {
+    const d = path.dirname(exe);
+    if (fs.existsSync(path.join(d, 'portable.ini')) || fs.existsSync(path.join(d, 'portable.txt'))) return d;
+  }
+  return findUserDir('PCSX2');
+}
+// Teshis icin: hangi klasor kullaniliyor ve gercekten bir emulator klasoru gibi mi?
+function describeDirs() {
+  const pc = pcsx2Dir(), dl = dolphinUserDir();
+  return {
+    pcsx2: { dir: pc, exists: fs.existsSync(path.join(pc, 'inis')) },
+    dolphin: { dir: dl, exists: fs.existsSync(path.join(dl, 'Config')) || fs.existsSync(path.join(dl, 'GameSettings')) }
+  };
+}
 
 // Emulatorleri tipik yerlerde (ve Masaustu/Indirilenler altinda 3 seviye) arar.
 function walkFind(dir, matchers, depth, out) {
@@ -65,4 +93,4 @@ function detectEmulators() {
   return out;
 }
 
-module.exports = { dolphinUserDir, pcsx2Dir, detectEmulators };
+module.exports = { dolphinUserDir, pcsx2Dir, detectEmulators, configure, describeDirs };

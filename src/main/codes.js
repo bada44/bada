@@ -140,6 +140,10 @@ function create({ cacheDir, fetchBuffer, now = () => Date.now() }) {
     } catch (e) { return []; }
   }
 
+  function hasPs2Cache() {
+    try { return fs.readdirSync(dir('ps2')).some((f) => parsePnachName(f)); } catch (e) { return false; }
+  }
+
   // Oyun icin kod dosyasini bulur; yoksa depodan indirir. Yolunu ya da null dondurur.
   async function getCodeFile(platform, id) {
     if (!id) return null;
@@ -178,7 +182,7 @@ function create({ cacheDir, fetchBuffer, now = () => Date.now() }) {
     return { exact, otherRegions: [...new Set(others)] };
   }
 
-  return { updateIndex, getCodeFile, ps2Files, availability, readIndex, cacheDir };
+  return { updateIndex, getCodeFile, ps2Files, hasPs2Cache, availability, readIndex, cacheDir };
 }
 
 module.exports = { create, readZipEntries, gcRegion, ps2Region, parsePnachName, pnachGroups, isFpsGroup, DEFAULT_PCSX2_ZIP };

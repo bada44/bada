@@ -127,7 +127,12 @@ function identify(game) {
 // Oyun acilmadan once cagrilir. Kullaniciya gosterilecek kisa notlari dondurur.
 async function prepare(game, settings) {
   const notes = [];
-  if (!settings.autoFps || game.autoFps === false) return notes;
+  if (!settings.autoFps || game.autoFps === false) return ['Oto FPS bu oyunda kapali (Ayarlar veya oyun detayindan acabilirsin).'];
+  const dirs = paths.describeDirs();
+  const emuDir = game.platform === 'gamecube' ? dirs.dolphin : dirs.pcsx2;
+  if (!emuDir.exists) {
+    notes.push(`UYARI: ${game.platform === 'gamecube' ? 'Dolphin' : 'PCSX2'} ayar klasoru bulunamadi (${emuDir.dir}). Emulatoru bir kez elle acip kapat, sonra tekrar dene; portable kullaniyorsan exe yaninda portable.ini olmali.`);
+  }
 
   if (game.platform === 'gamecube') {
     const id = cheats.readGameCubeId(game.filePath);
@@ -146,6 +151,7 @@ async function prepare(game, settings) {
       notes.push(`60 FPS kodu kuruldu: ${res.codeName} (${codes.gcRegion(id)})`);
     } else if (repo) {
       const a = repo.availability('gamecube', id);
+      if (!a.otherRegions.length) notes.push(`Bu GameCube oyunu (${id}) icin depoda 60 FPS kodu yok.`);
       if (a.otherRegions.length) {
         notes.push(`Bu bolge (${codes.gcRegion(id)}) icin 60 FPS kodu yok; ${a.otherRegions.join('/')} icin var. Yanlis bolge kodu oyunu cokertir, kurulmadi.`);
       }
@@ -159,8 +165,15 @@ async function prepare(game, settings) {
       if (after !== before) fs.writeFileSync(iniPath, after, 'utf8');
     }
     const info = readPs2Info(game.filePath);
+    if (!info) notes.push('PS2 oyun kimligi (CRC) okunamadi; bu imajda yama otomatik bulunamaz.');
     if (info) {
       const crc = info.crc;
+      // Depo ilk kez indirilmediyse oyunu baslatmadan once indirmeyi bekle (en fazla 45 sn)
+      if (repo && repo.ps2Files(crc).length === 0 && !repo.hasPs2Cache()) {
+        notes.push('Yama deposu ilk kez indiriliyor...');
+        const r = await Promise.race([repo.updateIndex(settings, {}), new Promise((res) => setTimeout(() => res({ errors: ['zaman asimi'] }), 45000))]);
+        if (r.errors && r.errors.length) notes.push('Depo indirilemedi: ' + r.errors.join(' | ') + ' (internetini kontrol et).');
+      }
       const files = [];
       const own = findCodeFile([`${crc}.pnach`], searchFolders('ps2', settings));
       if (own) files.push(own);
@@ -183,6 +196,8 @@ async function prepare(game, settings) {
         } else {
           notes.push(`Yama kuruldu (${crc}) ama icinde 60 FPS grubu yok (sadece genis ekran vb.).`);
         }
+      } else {
+        notes.push(`Bu oyun icin depoda yama yok (${info.serial || '?'} / CRC ${crc}). Bu surum icin 60 FPS yamasi yazilmamis olabilir; baska bolge surumu varsa o calisir.`);
       }
     }
   }

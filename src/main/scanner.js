@@ -72,7 +72,9 @@ function syncLibrary() {
       favorite: prev?.favorite || false,
       autoFps: prev?.autoFps !== false,
       patched: prev?.patched || false,
-      patchNote: prev?.patchNote || null
+      patchNote: prev?.patchNote || null,
+      fpsReport: prev?.fpsReport || null,
+      coverTried: prev?.coverTried || false
     };
   }
 

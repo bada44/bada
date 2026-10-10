@@ -4,6 +4,18 @@ GameCube (Dolphin) ve PS2 (PCSX2) için konsol tarzı masaüstü launcher.
 Gamepad ile baştan sona kullanılır; Türkçe yama, otomatik FPS profili, oynama süresi
 ve klasör tabanlı bulut kayıt eşitleme içerir.
 
+## Yeni (1.3)
+- **Tuş düzeltmesi:** Steam görünümünde klavye ve gamepad çalışıyor (oklar/D-pad gezin, Enter/A aç ve oyna, Esc/B geri, F/X favori, Q-E veya LB/RB filtre, S/Start ayarlar, / ara). Sol menü düğmeleri artık her açılışta bağlanıyor (betik yükleme sırası hatası giderildi).
+- **Emülatör yolu yoksa** Oyna'ya basınca açıklayıcı pencere çıkar ve doğrudan ilgili ayara götürür.
+- **Yeni menü:** sol menüde bölümler, ikonlar, seçili öğe çubuğu, Dolphin/PCSX2 hazır mı göstergesi (tıklayınca ayara gider). Ayarlar tek uzun sayfa yerine sekmeli: Kütüphane, Emülatörler, FPS ve Kodlar, Bulut, Türkçe Yama, Görünüm.
+
+## Yeni (1.2)
+- **Steam tarzı kütüphane:** sol menü (filtre, sıralama, kart boyutu), kapak ızgarası, oyun sayfası (büyük YEŞİL "OYNA" butonu, süre, son oynama). Gamepad için eski konsol ekranı "Büyük Ekran modu" olarak duruyor.
+- **Kapaklar otomatik iner** (libretro thumbnails). Bulunamayan oyunlar harfli renkli kart olarak görünür; 7 günde bir tekrar denenir.
+- **FPS teşhisi:** Oyun sayfasında "60 FPS durumu" kartı: depoda yama var mı, son açılışta ne yapıldı, uyarılar. (Oyun açılınca RetroHub küçüldüğü için bildirimleri kaçırırsın; rapor orada kalır.)
+- **Düzeltmeler:** Portable PCSX2/Dolphin tanınır (ayarlar emülatörün kendi klasörüne yazılır). Yama deposu hiç inmediyse oyun açılırken beklenir. Depoda yama yoksa nedenini yazar.
+- **Android:** aynı Steam görünümü, dar ekranda sütunlar ve yatay filtre çipleri; geri tuşu açık sayfayı kapatır.
+
 ## Yeni (1.1)
 - **Otomatik tarama:** Uygulama açılırken ve ROM klasörüne dosya eklenince/silinince kütüphane kendiliğinden güncellenir.
 - **İnternetten kod deposu:** 60 FPS kodları oyunun ID/CRC değerine göre indirilir ve önbelleğe alınır (Ayarlar → Kod Deposu).
