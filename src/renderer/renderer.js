@@ -28,7 +28,7 @@ function gradientFor(g) {
   const h = hueOf(g.title);
   return `linear-gradient(145deg, hsl(${h} 65% 38%), hsl(${(h + 50) % 360} 70% 18%))`;
 }
-function coverStyle(g) { return g.cover ? `url("${fileUrl(g.cover)}")` : gradientFor(g); }
+function coverStyle(g) { return g.cover ? `url('${fileUrl(g.cover)}')` : gradientFor(g); }
 const platName = (g) => (g.platform === 'gamecube' ? 'GAMECUBE' : 'PS2');
 
 // ---------- Ses ----------
@@ -195,7 +195,6 @@ function updateHero() {
   $('#heroTitle').textContent = g.title;
   $('#heroBadges').innerHTML =
     `<span class="chip ${g.platform}">${g.platform === 'gamecube' ? 'GAMECUBE' : 'PS2'}</span>` +
-    (!isMobile() && state.settings.autoFps && g.autoFps !== false ? '<span class="chip fps">OTO 60 FPS</span>' : '') +
     (g.patched ? '<span class="chip ok">TÜRKÇE</span>' : '');
   $('#heroMeta').textContent = `${fmtDuration(g.totalPlaySeconds)} oynandı  •  Son: ${fmtDate(g.lastPlayed)}`;
   $('#heroFavText').textContent = 'Favori';
