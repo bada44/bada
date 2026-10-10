@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Magaza - RetroHub</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #1b2838; color: #c7d5e0; padding: 20px; }
+    .header { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+    .header h1 { font-size: 24px; color: #fff; flex: 1; }
+    .search { background: #316282; border: none; color: #fff; padding: 10px 15px; border-radius: 4px; font-size: 14px; width: 250px; }
+    .search::placeholder { color: #9cbcd9; }
+    .info-bar { background: #2a475e; padding: 10px 15px; border-radius: 4px; margin-bottom: 20px; font-size: 13px; color: #ffcc66; }
+    .games { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+    .game-card { background: #16202d; border-radius: 6px; padding: 12px; display: flex; gap: 12px; align-items: center; transition: background 0.2s; }
+    .game-card:hover { background: #1f2f3f; }
+    .game-card img { width: 60px; height: 80px; object-fit: cover; border-radius: 4px; background: #0e1621; }
+    .game-info { flex: 1; min-width: 0; }
+    .game-title { font-size: 15px; color: #fff; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .game-meta { font-size: 12px; color: #8f98a0; display: flex; gap: 10px; }
+    .download-btn { background: #1a9fff; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; font-size: 13px; font-weight: bold; cursor: pointer; }
+    .download-btn:hover { background: #4cb4ff; }
+    .empty { text-align: center; padding: 40px; color: #8f98a0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🛒 Magaza</h1>
+    <input type="text" class="search" id="search" placeholder="Oyun ara...">
+  </div>
+  <div class="info-bar">
+    ⚠ Indir butonuna bastiginizda oyunun sayfasi tarayicida acilir. Oradan indirip RetroHub ROM klasorune koyun.
+  </div>
+  <div class="games" id="games"></div>
+  <script src="store.js"></script>
+</body>
+</html>

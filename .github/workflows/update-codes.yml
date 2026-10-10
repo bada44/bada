@@ -1,0 +1,36 @@
+name: Update Codes
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-codes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch codes
+        run: node tools/fetch-codes.js
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add codes-repo/
+          if git diff --staged --quiet; then
+            echo "Degisiklik yok"
+          else
+            git commit -m "chore: 60 FPS kodlari guncellendi"
+            git push
+          fi

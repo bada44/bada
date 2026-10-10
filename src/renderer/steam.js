@@ -5,7 +5,7 @@ const STEAM_FILTERS = ['all', 'fav', 'recent', 'gamecube', 'ps2'];
 let pageSig = '';
 
 function initSteam() {
-  state.view = state.settings.viewMode || 'library';
+  state.view = state.settings.viewMode || 'bigpicture';
   if (isMobile() && state.view !== 'library') state.view = 'library';
   state.sort = state.settings.sortMode || 'name';
   $('#sSort').value = state.sort;
@@ -25,6 +25,14 @@ function initSteam() {
   $('#sEmptySettings').addEventListener('click', openSettings);
   $('#sBig').addEventListener('click', () => setView('bigpicture'));
   $('#btnLibrary').addEventListener('click', () => setView('library'));
+
+  // L: konsol menusu <-> kutuphane
+  document.addEventListener('keydown', (e) => {
+    if ((e.key !== 'l' && e.key !== 'L') || e.ctrlKey || e.metaKey || e.altKey || state.playing || isMobile()) return;
+    if (document.activeElement && document.activeElement.matches('input, textarea, select')) return;
+    if (layer() !== 'home') return;
+    setView(state.view === 'library' ? 'bigpicture' : 'library');
+  });
 
   // Ayarlar kategorileri
   $$('#setNav button').forEach((b) => b.addEventListener('click', () => setSettingsCat(b.dataset.cat)));

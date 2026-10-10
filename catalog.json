@@ -1,0 +1,68 @@
+{
+  "games": [
+    {
+      "id": "SLUS-21134",
+      "title": "Resident Evil 4",
+      "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Resident%20Evil%204%20(USA).png",
+      "size": "4.2 GB",
+      "rating": 5,
+      "url": "https://romsfun.com/roms/playstation-2/resident-evil-4.html"
+    },
+    {
+      "id": "SLUS-21242",
+      "title": "Need for Speed Underground 2",
+      "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Need%20for%20Speed%20Underground%202%20(USA).png",
+      "size": "2.8 GB",
+      "rating": 5,
+      "url": "https://romsfun.com/roms/playstation-2/need-for-speed-underground-2.html"
+    },
+    {
+      "id": "SCUS-97481",
+      "title": "God of War",
+      "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/God%20of%20War%20(USA).png",
+      "size": "7.5 GB",
+      "rating": 5,
+      "url": "https://romsfun.com/roms/playstation-2/god-of-war.html"
+    },
+    {
+      "id": "SCUS-97482",
+      "title": "God of War II",
+      "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/God%20of%20War%20II%20(USA).png",
+      "size": "7.9 GB",
+      "rating": 5,
+      "url": "https://romsfun.com/roms/playstation-2/god-of-war-2.html"
+    },
+    {
+      "id": "SCUS-97113",
+      "title": "Shadow of the Colossus",
+      "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Shadow%20of%20the%20Colossus%20(USA).png",
+      "size": "3.4 GB",
+      "rating": 5,
+      "url": "https://romsfun.com/roms/playstation-2/shadow-of-the-colossus.html"
+    },
+    {
+      "id": "SLUS-20312",
+      "title": "Final Fantasy X",
+      "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Final%20Fantasy%20X%20(USA).png",
+      "size": "4.4 GB",
+      "rating": 5,
+      "url": "https://romsfun.com/roms/playstation-2/final-fantasy-x.html"
+    },
+    {
+      "id": "SLUS-20552",
+      "title": "Grand Theft Auto: San Andreas",
+      "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Grand%20Theft%20Auto%20-%20San%20Andreas%20(USA).png",
+      "size": "4.7 GB",
+      "rating": 5,
+      "url": "https://romsfun.com/roms/playstation-2/grand-theft-auto-san-andreas.html"
+    },
+    {
+      "id": "SLUS-20445",
+      "title": "Devil May Cry 3",
+      "cover": "https://raw.githubusercontent.com/libretro-thumbnails/Sony_-_PlayStation_2/master/Named_Boxarts/Devil%20May%20Cry%203%20(USA).png",
+      "size": "4.1 GB",
+      "rating": 5,
+      "url": "https://romsfun.com/roms/playstation-2/devil-may-cry-3.html"
+    }
+  ]
+}

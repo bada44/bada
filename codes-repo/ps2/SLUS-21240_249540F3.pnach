@@ -1,0 +1,23 @@
+gametitle=Star Wars - Battlefront II NTSC-U SLUS-21240 02F4B541 secondary crc 249540f3
+
+[Widescreen 16:9]
+gsaspectratio=16:9
+author=nemesis2000 and Arapapa
+description=Widescreen hack 16:9
+//00000000 00000000 83051646 00000000
+//403f013c 00008144 83051646 03000046
+patch=1,EE,00580784,word,3c013f40 //hor fov
+patch=1,EE,00580788,word,44810000
+patch=1,EE,00580790,word,46000003
+
+[60 FPS]
+author=Gabominated
+description=Might need EE Overclock (130%).
+patch=1,EE,20602c9c,extended,00000001
+patch=1,EE,E0010200,extended,015A79B8
+patch=1,EE,20602c9c,extended,00000002
+
+[Disable Blur/Bloom]
+author=Gabominated
+description=Disable the post-processing blur/bloom effect.
+patch=1,EE,0060E420,word,00000000

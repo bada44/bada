@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, dialog, net } = require('electron');
+const { setupCatalog } = require('./catalog');
 const path = require('path');
 const fs = require('fs');
 
@@ -47,6 +48,27 @@ if (!gotLock) {
     if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.focus(); }
   });
   app.whenReady().then(() => {
+    setupCatalog();
+
+    // --- Mağaza penceresi ---
+    ipcMain.handle('catalog:openStore', () => {
+      const storeWin = new BrowserWindow({
+        width: 1000,
+        height: 700,
+        title: 'RetroHub Mağaza',
+        parent: mainWindow,
+        modal: false,
+        backgroundColor: '#1b2838',
+        webPreferences: {
+          preload: path.join(__dirname, '..', 'preload.js'),
+          contextIsolation: true,
+          nodeIntegration: false
+        }
+      });
+      storeWin.loadFile(path.join(__dirname, '..', 'renderer', 'store.html'));
+    });
+    // --- Mağaza penceresi sonu ---
+
     createWindow();
     paths.configure(store.get('settings'));
     initCodeRepo();

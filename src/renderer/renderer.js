@@ -147,14 +147,12 @@ function renderAll() {
   list.forEach((g, i) => {
     const t = document.createElement('div');
     t.className = 'tile' + (i === state.sel ? ' sel' : '');
-    t.style.background = coverStyle(g);
-    t.style.backgroundSize = 'cover';
-    t.style.backgroundPosition = 'center';
     t.innerHTML = `
-      ${g.cover ? '' : `<div class="tile-initial">${esc(g.title.charAt(0).toUpperCase())}</div>`}
-      <span class="tile-plat ${g.platform}">${platName(g)}</span>
-      ${g.favorite ? '<span class="tile-star">★</span>' : ''}
-      <div class="tile-title">${esc(g.title)}</div>`;
+      <div class="tile-art" style="background:${coverStyle(g)};background-size:cover;background-position:center">
+        ${g.cover ? '' : `<div class="tile-initial">${esc(g.title.charAt(0).toUpperCase())}</div><div class="tile-title">${esc(g.title)}</div>`}
+        ${g.favorite ? '<span class="tile-star">★</span>' : ''}
+      </div>
+      <div class="tile-cap">${esc(tileCaption(g))}</div>`;
     t.addEventListener('click', () => { if (state.sel === i) play(); else { state.sel = i; updateSelection(); beep(480); } });
     t.addEventListener('dblclick', () => play());
     rail.appendChild(t);
@@ -173,9 +171,19 @@ function updateSelection() {
   updateHero();
   scrollToSel(true);
 }
+// Secili kart rayin sol basinda durur (konsol menusu gibi); sagdakiler sirayla gorunur.
 function scrollToSel(smooth) {
+  const rail = $('#rail');
   const t = $$('#rail .tile')[state.sel];
-  if (t) t.scrollIntoView({ inline: 'center', block: 'nearest', behavior: smooth ? 'smooth' : 'auto' });
+  if (!rail || !t) return;
+  const padLeft = parseFloat((typeof getComputedStyle === 'function' ? getComputedStyle(rail).paddingLeft : 0)) || 0;
+  rail.scrollTo({ left: Math.max(0, t.offsetLeft - padLeft), behavior: smooth ? 'smooth' : 'auto' });
+}
+function tileCaption(g) {
+  const s = g.totalPlaySeconds || 0;
+  if (s < 60) return 'Henüz oynanmadı';
+  const h = Math.floor(s / 3600);
+  return h >= 1 ? `${h} Saat Oynandı` : `${Math.floor(s / 60)} Dk Oynandı`;
 }
 
 function updateHero() {
@@ -186,12 +194,12 @@ function updateHero() {
   $('#bg').style.backgroundPosition = 'center';
   $('#heroTitle').textContent = g.title;
   $('#heroBadges').innerHTML =
-    `<span class="chip ${g.platform}">${platName(g)}</span>` +
-    (g.patched ? '<span class="chip ok">✓ TÜRKÇE YAMALI</span>' : '') +
-    (g.favorite ? '<span class="chip fav">★ FAVORİ</span>' : '') +
-    (!isMobile() && state.settings.autoFps && g.autoFps !== false ? '<span class="chip">⚡ OTO FPS</span>' : '');
+    `<span class="chip ${g.platform}">${g.platform === 'gamecube' ? 'GAMECUBE' : 'PS2'}</span>` +
+    (!isMobile() && state.settings.autoFps && g.autoFps !== false ? '<span class="chip fps">OTO 60 FPS</span>' : '') +
+    (g.patched ? '<span class="chip ok">TÜRKÇE</span>' : '');
   $('#heroMeta').textContent = `${fmtDuration(g.totalPlaySeconds)} oynandı  •  Son: ${fmtDate(g.lastPlayed)}`;
-  $('#heroFavText').textContent = g.favorite ? 'Favoriden çıkar' : 'Favori';
+  $('#heroFavText').textContent = 'Favori';
+  $('#heroFav').classList.toggle('on', !!g.favorite);
 }
 
 // ---------- Oyun islemleri ----------
@@ -473,6 +481,19 @@ $('#cloudNow').addEventListener('click', async () => {
     const r = await api.cloud.syncNow();
     toast(`Eşitlendi: ${r.down} indirildi, ${r.up} yüklendi`, 'ok');
   } catch (err) { ask('Bulut hatası', err.message); }
+});
+
+$('#btnSync').addEventListener('click', async () => {
+  const b = $('#btnSync');
+  if (b.classList.contains('busy')) return;
+  const s = await api.settings.get();
+  if (!s.cloudFolder) { openSettings('cloud'); toast('Önce bulut klasörünü seç (Drive/Dropbox/OneDrive).', 'info'); return; }
+  b.classList.add('busy');
+  try {
+    const r = await api.cloud.syncNow();
+    toast(`Eşitlendi: ${r.down} indirildi, ${r.up} yüklendi`, 'ok');
+  } catch (err) { ask('Bulut hatası', err.message); }
+  finally { b.classList.remove('busy'); }
 });
 
 $('#autoScanBtn').addEventListener('click', async () => {

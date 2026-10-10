@@ -1,5 +1,10 @@
 {
-  "version": 1,
-  "gc": {},
+  "version": 3,
+  "gc": {
+    "NABE01": {
+      "title": "60 FPS",
+      "file": "gc/NABE01.txt"
+    }
+  },
   "ps2": {}
 }

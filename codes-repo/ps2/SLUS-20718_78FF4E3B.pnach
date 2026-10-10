@@ -1,0 +1,28 @@
+gametitle=Sonic Heroes (NTSC-U) (SLUS-20718) 78FF4E3B
+
+[Widescreen 16:9]
+gsaspectratio=16:9
+author=Brandondorf9999
+//---
+patch=1,EE,000C0000,word,3C023F40
+patch=1,EE,000C0004,word,34420000
+patch=1,EE,000C0008,word,44828800
+patch=1,EE,000C000C,word,46000803
+patch=1,EE,000C0010,word,46008802
+patch=1,EE,000C0014,word,0805A938
+patch=1,EE,000C0018,word,3C023F80
+patch=1,EE,000C001C,word,34420000
+patch=1,EE,000C0020,word,44828800
+patch=1,EE,000C0024,word,46000803
+patch=1,EE,000C0028,word,46008802
+patch=1,EE,000C002C,word,0805A93B
+patch=1,EE,0016A4B4,word,3C023F80
+patch=1,EE,0016A4DC,word,08030000
+patch=1,EE,0016A4E8,word,08030006
+patch=1,EE,002AD094,word,24050002//---
+
+[60 FPS]
+author=asasega
+description=Might need EE Overclock at 130%.
+patch=1,EE,004777C0,word,00000001 //fps
+patch=1,EE,2028FF5C,word,24020001 //speed
