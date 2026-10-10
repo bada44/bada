@@ -24,6 +24,7 @@
       <input id="search" type="search" placeholder="Ara ( / )" />
       <span id="padStatus" class="pad-status" title="Kontrolcü">🎮</span>
       <span id="clock" class="clock"></span>
+      <button id="btnStore" class="icon-btn" title="Mağaza" onclick="window.retrohub.catalog.openStore()">🛒</button>
       <button id="btnLibrary" class="icon-btn" title="Kütüphane görünümü">🗂</button>
       <button id="btnRandom" class="icon-btn" title="Şanslı oyun">🎲</button>
       <button id="btnFull" class="icon-btn" title="Tam ekran (F11)">⛶</button>
@@ -45,6 +46,8 @@
         <div class="s-label">PLATFORMLAR</div>
         <button class="focusable" data-filter="gamecube"><i>🟣</i><span>GameCube</span><em id="cGc"></em></button>
         <button class="focusable" data-filter="ps2"><i>🔵</i><span>PlayStation 2</span><em id="cPs2"></em></button>
+        <div class="s-label">MAĞAZA</div>
+        <button class="focusable" onclick="window.retrohub.catalog.openStore()"><i>🛒</i><span>Oyun Mağazası</span></button>
       </nav>
       <div class="s-tools">
         <label>Sırala
