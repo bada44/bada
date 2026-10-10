@@ -39,11 +39,28 @@ jobs:
         with: { node-version: 20 }
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 17 }
+
+      - name: Android SDK yolunu ayarla
+        run: |
+          SDK_ROOT="/usr/local/lib/android/sdk"
+          if [ ! -d "$SDK_ROOT" ]; then SDK_ROOT="$ANDROID_HOME"; fi
+          echo "SDK yolu: $SDK_ROOT"
+          echo "ANDROID_HOME=$SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> $GITHUB_ENV
+          echo "$SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$SDK_ROOT/platform-tools" >> $GITHUB_PATH
+          echo "$SDK_ROOT/cmdline-tools/latest/bin" >> ~/.bashrc
+          export PATH="$SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+          which sdkmanager || find $SDK_ROOT -name sdkmanager 2>/dev/null | head -3
+
       - name: Android SDK paketleri
         run: |
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
           yes | sdkmanager --licenses || true
           sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+
       - uses: gradle/actions/setup-gradle@v4
+
       - name: Android projesini olustur
         working-directory: mobile
         run: |
@@ -52,13 +69,16 @@ jobs:
           npx cap add android
           node scripts/setup-android.js
           npx cap sync android
+
       - name: APK derle
         working-directory: mobile/android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
+
       - name: APK'yi adlandir
         run: cp mobile/android/app/build/outputs/apk/debug/app-debug.apk RetroHub-Android.apk
+
       - uses: actions/upload-artifact@v4
         with:
           name: RetroHub-Android
