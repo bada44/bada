@@ -1,0 +1,172 @@
+/* ===== RetroHub Enhanced UI ===== */
+
+/* Topbar - cam efekti */
+.topbar {
+  background: linear-gradient(180deg, rgba(20,25,40,0.95), rgba(15,20,35,0.85)) !important;
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(100,150,255,0.15) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.brand {
+  font-weight: 800 !important;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #6ec1ff, #a86eff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-dot {
+  box-shadow: 0 0 12px #6ec1ff, 0 0 24px rgba(110,193,255,0.5) !important;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Sekmeler */
+.tab {
+  transition: all 0.2s ease;
+  border-radius: 8px !important;
+}
+.tab:hover {
+  background: rgba(110,193,255,0.15) !important;
+  transform: translateY(-1px);
+}
+.tab.active {
+  background: linear-gradient(135deg, #1a6fc4, #6e4ec4) !important;
+  box-shadow: 0 4px 15px rgba(110,110,255,0.4);
+  color: #fff !important;
+}
+
+/* İkon butonları */
+.icon-btn {
+  transition: all 0.2s ease;
+  border-radius: 10px !important;
+}
+.icon-btn:hover {
+  background: rgba(110,193,255,0.2) !important;
+  transform: scale(1.08);
+}
+.icon-btn:active {
+  transform: scale(0.95);
+}
+
+/* Sol menü */
+.s-side {
+  background: linear-gradient(180deg, rgba(15,20,35,0.95), rgba(10,15,28,0.98)) !important;
+  backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(100,150,255,0.12) !important;
+  box-shadow: 4px 0 30px rgba(0,0,0,0.3);
+}
+
+.s-brand {
+  font-weight: 800 !important;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #6ec1ff, #a86eff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(100,150,255,0.1);
+  margin-bottom: 8px;
+}
+
+/* Sol menü linkleri */
+.s-nav button {
+  transition: all 0.2s ease;
+  border-radius: 10px !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.s-nav button::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #6ec1ff, #a86eff);
+  transform: scaleY(0);
+  transition: transform 0.25s ease;
+  border-radius: 0 3px 3px 0;
+}
+
+.s-nav button:hover {
+  background: rgba(110,193,255,0.1) !important;
+  transform: translateX(3px);
+}
+.s-nav button:hover::before {
+  transform: scaleY(1);
+}
+
+.s-nav button.active,
+.s-nav button[aria-selected="true"] {
+  background: linear-gradient(135deg, rgba(110,193,255,0.2), rgba(168,110,255,0.15)) !important;
+  box-shadow: 0 4px 15px rgba(110,110,255,0.2);
+}
+.s-nav button.active::before {
+  transform: scaleY(1);
+}
+
+/* Bölüm başlıkları */
+.s-label {
+  color: rgba(150,170,200,0.6) !important;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  font-size: 10px !important;
+  margin-top: 16px;
+}
+
+/* Arama kutusu */
+.s-search, #search, #sSearch {
+  background: rgba(30,45,70,0.6) !important;
+  border: 1px solid rgba(100,150,255,0.15) !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease;
+}
+.s-search:focus, #search:focus, #sSearch:focus {
+  background: rgba(30,45,70,0.9) !important;
+  border-color: rgba(110,193,255,0.5) !important;
+  box-shadow: 0 0 0 3px rgba(110,193,255,0.15);
+  outline: none;
+}
+
+/* Oyun kartları (Steam grid) */
+.s-grid > * {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+}
+.s-grid > *:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(110,193,255,0.3);
+  z-index: 10;
+}
+
+/* Ayarlar kartları */
+.card {
+  border-radius: 14px !important;
+  transition: all 0.2s ease;
+}
+.card:hover {
+  border-color: rgba(110,193,255,0.3);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+/* Kaydırma çubuğu */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #1a6fc4, #6e4ec4);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #2a8fe4, #8e6ee4);
+}
+
+/* Genel geçişler */
+button, .tab, .icon-btn, .focusable {
+  transition: all 0.2s ease;
+}
