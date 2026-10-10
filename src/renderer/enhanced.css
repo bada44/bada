@@ -1,172 +1,429 @@
-/* ===== RetroHub Enhanced UI ===== */
+/* ============================================================
+   RetroHub — Konsol (Big Picture) Tasarımı
+   ============================================================ */
 
-/* Topbar - cam efekti */
+/* ---------- Genel arka plan ---------- */
+body {
+  background: #0a0f1e !important;
+  overflow-x: hidden;
+}
+
+#bg {
+  position: fixed !important;
+  inset: 0;
+  background-size: cover !important;
+  background-position: center !important;
+  filter: blur(30px) brightness(0.35) saturate(1.4);
+  transform: scale(1.15);
+  z-index: -2;
+  transition: background-image 0.8s ease;
+}
+
+#bgShade {
+  position: fixed !important;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(10,15,30,0.2) 0%,
+    rgba(10,15,30,0.4) 40%,
+    rgba(10,15,30,0.85) 75%,
+    rgba(10,15,30,1) 100%) !important;
+  z-index: -1;
+}
+
+/* ---------- Üst bar ---------- */
 .topbar {
-  background: linear-gradient(180deg, rgba(20,25,40,0.95), rgba(15,20,35,0.85)) !important;
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(100,150,255,0.15) !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 24px 40px 12px !important;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .brand {
-  font-weight: 800 !important;
-  letter-spacing: 2px;
-  background: linear-gradient(90deg, #6ec1ff, #a86eff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: 3px;
+  color: #fff !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .brand-dot {
-  box-shadow: 0 0 12px #6ec1ff, 0 0 24px rgba(110,193,255,0.5) !important;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6ec1ff, #a86eff);
+  box-shadow: 0 0 10px #6ec1ff;
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-/* Sekmeler */
-.tab {
+/* Sekmeler — pill style */
+#tabs {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+
+#tabs .tab {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: #c7d5e0 !important;
+  padding: 8px 18px !important;
+  border-radius: 20px !important;
+  font-size: 13px !important;
+  font-weight: 500;
   transition: all 0.2s ease;
-  border-radius: 8px !important;
 }
-.tab:hover {
-  background: rgba(110,193,255,0.15) !important;
-  transform: translateY(-1px);
-}
-.tab.active {
-  background: linear-gradient(135deg, #1a6fc4, #6e4ec4) !important;
-  box-shadow: 0 4px 15px rgba(110,110,255,0.4);
+
+#tabs .tab:hover {
+  background: rgba(255,255,255,0.12) !important;
   color: #fff !important;
 }
 
-/* İkon butonları */
-.icon-btn {
-  transition: all 0.2s ease;
-  border-radius: 10px !important;
+#tabs .tab.active {
+  background: rgba(255,255,255,0.15) !important;
+  color: #fff !important;
+  border-color: rgba(255,255,255,0.25) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
-.icon-btn:hover {
-  background: rgba(110,193,255,0.2) !important;
+
+/* Sağdaki ikonlar */
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-right .icon-btn {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  color: #c7d5e0 !important;
+  font-size: 14px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.top-right .icon-btn:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: #fff !important;
   transform: scale(1.08);
 }
-.icon-btn:active {
-  transform: scale(0.95);
+
+.top-right .clock {
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 500;
+  padding: 0 8px;
 }
 
-/* Sol menü */
-.s-side {
-  background: linear-gradient(180deg, rgba(15,20,35,0.95), rgba(10,15,28,0.98)) !important;
-  backdrop-filter: blur(24px);
-  border-right: 1px solid rgba(100,150,255,0.12) !important;
-  box-shadow: 4px 0 30px rgba(0,0,0,0.3);
+.top-right .pad-status {
+  color: #6ec1ff !important;
+  font-size: 16px;
 }
 
-.s-brand {
-  font-weight: 800 !important;
-  letter-spacing: 2px;
-  background: linear-gradient(90deg, #6ec1ff, #a86eff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(100,150,255,0.1);
-  margin-bottom: 8px;
+/* Arama kutusunu gizle (tasarımda yok) */
+.topbar #search { display: none !important; }
+
+/* Save Sync gibi butonlar */
+.top-right button:not(.icon-btn) {
+  background: rgba(255,255,255,0.08) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 20px !important;
+  padding: 6px 14px !important;
+  color: #c7d5e0 !important;
+  font-size: 12px !important;
+  font-weight: 500;
 }
 
-/* Sol menü linkleri */
-.s-nav button {
-  transition: all 0.2s ease;
-  border-radius: 10px !important;
+/* ---------- Hero ---------- */
+#hero, .hero {
+  min-height: 60vh !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  padding: 20px 60px 40px !important;
   position: relative;
-  overflow: hidden;
 }
 
-.s-nav button::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: linear-gradient(180deg, #6ec1ff, #a86eff);
-  transform: scaleY(0);
-  transition: transform 0.25s ease;
-  border-radius: 0 3px 3px 0;
+.hero-info {
+  max-width: 700px;
 }
 
-.s-nav button:hover {
-  background: rgba(110,193,255,0.1) !important;
-  transform: translateX(3px);
-}
-.s-nav button:hover::before {
-  transform: scaleY(1);
-}
-
-.s-nav button.active,
-.s-nav button[aria-selected="true"] {
-  background: linear-gradient(135deg, rgba(110,193,255,0.2), rgba(168,110,255,0.15)) !important;
-  box-shadow: 0 4px 15px rgba(110,110,255,0.2);
-}
-.s-nav button.active::before {
-  transform: scaleY(1);
+/* Rozetler */
+#heroBadges {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-/* Bölüm başlıkları */
-.s-label {
-  color: rgba(150,170,200,0.6) !important;
-  letter-spacing: 1.5px;
+.chip, #heroBadges .chip {
+  background: rgba(255,255,255,0.1) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  color: #fff !important;
+  padding: 5px 14px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* İlk rozet (PS2) — mor */
+#heroBadges .chip:nth-child(1) {
+  background: linear-gradient(135deg, #4a3a8f, #6e4ec4) !important;
+  border-color: rgba(168,110,255,0.4) !important;
+}
+
+/* İkinci rozet (FPS) — sarı kenar */
+#heroBadges .chip:nth-child(2) {
+  background: rgba(30,45,70,0.8) !important;
+  color: #ffd866 !important;
+  border-color: rgba(255,216,102,0.3) !important;
+}
+
+/* Büyük başlık */
+#heroTitle, .hero h1 {
+  font-size: 72px !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  margin: 12px 0 !important;
+  line-height: 1 !important;
+  letter-spacing: -2px;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.9), 0 0 80px rgba(110,193,255,0.2);
+}
+
+/* Meta bilgi (oynama süresi vs.) */
+#heroMeta, .hero-meta {
+  color: rgba(255,255,255,0.7) !important;
+  font-size: 15px !important;
+  margin-bottom: 24px !important;
+  font-weight: 400;
+}
+
+/* Buton grubu */
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Oyna butonu — beyaz */
+#heroPlay, .hero-actions .primary {
+  background: #fff !important;
+  color: #0a0f1e !important;
+  border: none !important;
+  padding: 14px 28px !important;
+  border-radius: 30px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 25px rgba(255,255,255,0.15);
+  transition: all 0.2s ease;
+}
+
+#heroPlay:hover, .hero-actions .primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(255,255,255,0.25);
+}
+
+/* Favori / Detay — koyu şeffaf */
+#heroFav, #heroDetail, .hero-actions .big:not(.primary) {
+  background: rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  color: #fff !important;
+  padding: 14px 24px !important;
+  border-radius: 30px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+#heroFav:hover, #heroDetail:hover {
+  background: rgba(255,255,255,0.15) !important;
+  transform: translateY(-2px);
+}
+
+/* Buton içindeki tuş harfleri (A, X, Y) */
+.hero-actions .key {
+  background: rgba(0,0,0,0.15);
+  border-radius: 50%;
+  width: 22px; height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
   font-weight: 700;
-  font-size: 10px !important;
-  margin-top: 16px;
 }
 
-/* Arama kutusu */
-.s-search, #search, #sSearch {
-  background: rgba(30,45,70,0.6) !important;
-  border: 1px solid rgba(100,150,255,0.15) !important;
-  border-radius: 10px !important;
-  transition: all 0.2s ease;
-}
-.s-search:focus, #search:focus, #sSearch:focus {
-  background: rgba(30,45,70,0.9) !important;
-  border-color: rgba(110,193,255,0.5) !important;
-  box-shadow: 0 0 0 3px rgba(110,193,255,0.15);
-  outline: none;
+#heroPlay .key {
+  background: #0a0f1e;
+  color: #fff;
 }
 
-/* Oyun kartları (Steam grid) */
-.s-grid > * {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 12px;
-}
-.s-grid > *:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(110,193,255,0.3);
-  z-index: 10;
+/* ---------- Oyun rayı (alt kısım) ---------- */
+.rail-wrap, #railWrap {
+  padding: 20px 0 !important;
+  margin-top: auto;
 }
 
-/* Ayarlar kartları */
-.card {
-  border-radius: 14px !important;
-  transition: all 0.2s ease;
+.rail, #rail {
+  display: flex !important;
+  gap: 16px !important;
+  padding: 20px 60px 30px !important;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
 }
-.card:hover {
-  border-color: rgba(110,193,255,0.3);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+
+.rail::-webkit-scrollbar, #rail::-webkit-scrollbar { display: none; }
+
+/* Kartlar */
+.rail > *, #rail > * {
+  flex-shrink: 0;
+  width: 170px !important;
+  height: 230px !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  background: #16202d;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 }
+
+.rail > * img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.rail > *:hover {
+  transform: translateY(-8px) scale(1.04);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px rgba(110,193,255,0.3);
+}
+
+/* Aktif / seçili kart — mavi parlama */
+.rail > *.active,
+.rail > *.selected,
+.rail > *[aria-selected="true"] {
+  outline: 3px solid #4a9eff;
+  outline-offset: 4px;
+  box-shadow: 0 0 40px rgba(74,158,255,0.7), 0 20px 40px rgba(0,0,0,0.6);
+  transform: translateY(-8px) scale(1.05);
+}
+
+/* Oynama süresi yazısı (kartın altında) */
+.rail-playtime {
+  position: absolute;
+  bottom: -28px;
+  left: 0; right: 0;
+  text-align: center;
+  color: rgba(255,255,255,0.6);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ---------- Alt ipucu çubuğu ---------- */
+#hints, .hints {
+  background: transparent !important;
+  border-top: 1px solid rgba(255,255,255,0.06) !important;
+  padding: 12px 40px !important;
+  color: rgba(255,255,255,0.5) !important;
+  font-size: 12px;
+}
+
+/* ---------- Steam / kütüphane görünümünü tamamen gizle ---------- */
+#steam, .steam {
+  display: none !important;
+}
+
+/* Büyük ekran aktifken kütüphaneyi gizle */
+body[data-view="bigpicture"] #steam,
+body[data-view="library"] #steam {
+  display: none !important;
+}
+
+/* Ana ekran her zaman görünür */
+#home, main {
+  display: flex !important;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- Mağaza modal ---------- */
+#storeModal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+#storeModal.hidden { display: none; }
+.store-box { width: 90%; max-width: 1100px; height: 85%; background: linear-gradient(180deg, #1a2332, #0f1622); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(110,193,255,0.15); }
+.store-head { padding: 20px 24px; background: rgba(10,15,25,0.6); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(110,193,255,0.1); }
+.store-head h2 { color: #fff; font-size: 20px; margin: 0; font-weight: 700; }
+.store-head button { background: rgba(255,255,255,0.08); color: #fff; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 16px; transition: all 0.2s; }
+.store-head button:hover { background: rgba(255,80,80,0.3); }
+.store-search { margin: 16px 24px; background: rgba(30,45,70,0.6); border: 1px solid rgba(110,193,255,0.2); color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 14px; outline: none; transition: all 0.2s; }
+.store-search:focus { border-color: rgba(110,193,255,0.5); box-shadow: 0 0 0 3px rgba(110,193,255,0.15); }
+.store-search::placeholder { color: #7a8ba0; }
+.store-list { flex: 1; overflow-y: auto; padding: 0 24px 24px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; align-content: start; }
+.store-item { background: rgba(22,32,45,0.8); border: 1px solid rgba(110,193,255,0.08); border-radius: 12px; padding: 14px; display: flex; gap: 14px; align-items: center; transition: all 0.2s; }
+.store-item:hover { background: rgba(31,47,63,0.9); border-color: rgba(110,193,255,0.25); transform: translateY(-2px); }
+.store-item img { width: 60px; height: 80px; object-fit: cover; border-radius: 8px; background: #0e1621; }
+.store-item .info { flex: 1; min-width: 0; }
+.store-item .name { color: #fff; font-size: 14px; font-weight: 600; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.store-item .meta { color: #7a8ba0; font-size: 12px; }
+.store-item .dl { background: linear-gradient(135deg, #1a9fff, #6e4ec4); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; letter-spacing: 0.5px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(110,110,255,0.3); }
+.store-item .dl:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(110,110,255,0.5); }
+.store-empty { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #7a8ba0; }
 
 /* Kaydırma çubuğu */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #1a6fc4, #6e4ec4);
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #2a8fe4, #8e6ee4);
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(110,193,255,0.3); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(110,193,255,0.5); }
+
+/* ---------- Mobil (max 768px) ---------- */
+@media (max-width: 768px) {
+  .topbar { padding: 12px 16px !important; flex-wrap: wrap; gap: 10px; }
+  .brand { font-size: 14px !important; letter-spacing: 2px; }
+  #tabs { order: 10; width: 100%; overflow-x: auto; justify-content: flex-start; padding-bottom: 4px; scrollbar-width: none; }
+  #tabs::-webkit-scrollbar { display: none; }
+  #tabs .tab { font-size: 12px !important; padding: 6px 14px !important; flex-shrink: 0; }
+  .top-right { gap: 6px; }
+  .top-right .icon-btn { width: 32px !important; height: 32px !important; font-size: 12px !important; }
+  .top-right .clock { font-size: 12px !important; }
+
+  #hero, .hero { min-height: 45vh !important; padding: 20px 20px 30px !important; }
+  #heroTitle, .hero h1 { font-size: 36px !important; letter-spacing: -1px; margin: 8px 0 !important; }
+  #heroMeta { font-size: 13px !important; margin-bottom: 16px !important; }
+  .hero-actions { flex-wrap: wrap; gap: 8px; }
+  #heroPlay, #heroFav, #heroDetail { padding: 10px 20px !important; font-size: 13px !important; }
+
+  .rail, #rail { padding: 12px 16px 20px !important; gap: 12px !important; }
+  .rail > *, #rail > * { width: 130px !important; height: 176px !important; }
+
+  .store-box { width: 96% !important; height: 92% !important; }
+  .store-list { grid-template-columns: 1fr !important; padding: 0 16px 16px !important; }
+  .store-search { margin: 12px 16px !important; }
 }
 
-/* Genel geçişler */
-button, .tab, .icon-btn, .focusable {
-  transition: all 0.2s ease;
+@media (max-width: 480px) {
+  #heroTitle, .hero h1 { font-size: 28px !important; }
+  .rail > *, #rail > * { width: 110px !important; height: 150px !important; }
 }
