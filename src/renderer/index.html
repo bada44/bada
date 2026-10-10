@@ -182,6 +182,7 @@
         <div class="toggle-row"><span>Topluluk 50/60 FPS yamalarını kullan (yüzlerce oyun, USA dahil)</span><button class="toggle focusable" data-toggle="useCommunityPatches"></button></div>
         <div class="row"><label>Kendi depo adresi (index.json, https)</label><div class="pick"><input id="codeRepoUrl" class="editable" placeholder="https://raw.githubusercontent.com/.../index.json" /></div></div>
         <button id="codesRefresh" class="btn primary focusable">⟳ Kodları Şimdi Güncelle</button>
+        <button id="codesCoverage" class="btn focusable">📊 USA 60 FPS kapsama raporu</button>
       </div>
 
       <div class="card wide desktop-only" data-cat="patch">
@@ -199,6 +200,7 @@
     <div class="modal-box">
       <h3 id="modalTitle"></h3>
       <p id="modalText"></p>
+      <textarea id="modalInput" class="modal-input hidden" spellcheck="false"></textarea>
       <div id="modalButtons" class="modal-buttons"></div>
     </div>
   </div>

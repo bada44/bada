@@ -1,0 +1,9 @@
+# Bagimliliklar ve uretilen dosyalar GitHub'a gonderilmez (yuzlerce MB tutar, 100 MB dosya limitini asar)
+node_modules/
+dist/
+mobile/node_modules/
+mobile/android/
+mobile/www/
+*.log
+.DS_Store
+Thumbs.db

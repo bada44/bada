@@ -78,6 +78,38 @@ function readZipEntries(buf) {
   return out;
 }
 
+// ---------- Yapistirilan kodlarin dogrulanmasi ----------
+// Disk'e sadece kod satirlari yazilir; baska hicbir metin kabul edilmez.
+const HEX_PAIR = /^[0-9A-Fa-f]{8}\s+[0-9A-Fa-f]{8}$/;
+const PNACH_LINE = /^(\/\/.*|gametitle=.*|comment=.*|patch=.*|author=.*|description=.*|group=.*|\[.*\]|)$/i;
+
+// Gecko: TEK bir "$Ad" blogu + hex satirlari. Birden fazla kod karisirsa oyun bozulur, reddedilir.
+function validGecko(text) {
+  let lines = String(text || '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const cut = lines.findIndex((l) => /^\[.+\]$/.test(l) && !/^\[Gecko\]$/i.test(l));
+  if (cut >= 0) lines = lines.slice(0, cut);               // [Gecko_Enabled] vb. ini bolumlerini at
+  lines = lines.filter((l) => !/^\[Gecko\]$/i.test(l) && !l.startsWith('*'));
+  if (!lines.length) return { ok: false, error: 'Kod bos.' };
+  if (lines.length > 400) return { ok: false, error: 'Kod cok uzun (en fazla 400 satir).' };
+  if (lines.filter((l) => l.startsWith('$')).length > 1) {
+    return { ok: false, error: 'Birden fazla kod var. Sadece 60 FPS kodunu yapistir (tek bir $ baslikli blok).' };
+  }
+  const bad = lines.find((l) => !l.startsWith('$') && !HEX_PAIR.test(l));
+  if (bad) return { ok: false, error: `Gecersiz satir: "${bad.slice(0, 40)}". Beklenen bicim: 0XXXXXXX 0XXXXXXX` };
+  if (!lines.some((l) => HEX_PAIR.test(l))) return { ok: false, error: 'Hex kod satiri bulunamadi.' };
+  return { ok: true, text: lines.join('\n') + '\n' };
+}
+
+function validPnach(text) {
+  const t = String(text || '');
+  if (t.length > 200000) return { ok: false, error: 'Dosya cok buyuk.' };
+  const lines = t.split(/\r?\n/).map((l) => l.trim());
+  const bad = lines.find((l) => !PNACH_LINE.test(l));
+  if (bad) return { ok: false, error: `Gecersiz satir: "${bad.slice(0, 40)}".` };
+  if (!lines.some((l) => /^patch=/i.test(l))) return { ok: false, error: 'patch= satiri bulunamadi (gecerli bir .pnach degil).' };
+  return { ok: true, text: lines.join('\n') + '\n' };
+}
+
 // ---------- Depo ----------
 function create({ cacheDir, fetchBuffer, now = () => Date.now() }) {
   const dir = (...p) => path.join(cacheDir, ...p);
@@ -130,15 +162,39 @@ function create({ cacheDir, fetchBuffer, now = () => Date.now() }) {
     return report;
   }
 
-  // Bir CRC icin onbellekteki tum .pnach dosyalari (resmi + topluluk olabilir).
+  // Bir CRC icin tum .pnach dosyalari: once kullanicinin yapistirdigi, sonra resmi + topluluk.
   function ps2Files(crc) {
     if (!crc) return [];
-    try {
-      return fs.readdirSync(dir('ps2'))
-        .filter((f) => { const i = parsePnachName(f); return i && i.crc === crc.toUpperCase(); })
-        .map((f) => dir('ps2', f));
-    } catch (e) { return []; }
+    const pick = (d) => {
+      try {
+        return fs.readdirSync(d)
+          .filter((f) => { const i = parsePnachName(f); return i && i.crc === crc.toUpperCase(); })
+          .map((f) => path.join(d, f));
+      } catch (e) { return []; }
+    };
+    return [...pick(dir('user', 'ps2')), ...pick(dir('ps2'))];
   }
+
+  // Kullanicinin yapistirdigi kod: oyunun TAM ID/CRC'sine baglanir, baska bolgeye uygulanmaz.
+  function saveUserCode(platform, id, text) {
+    const kind = platform === 'gamecube' ? 'gc' : 'ps2';
+    if (!id || !(kind === 'gc' ? /^[A-Z0-9]{6}$/ : /^[0-9A-F]{8}$/).test(id)) {
+      throw new Error('Oyunun kimligi (ID/CRC) okunamadi; kod kaydedilemedi.');
+    }
+    const v = kind === 'gc' ? validGecko(text) : validPnach(text);
+    if (!v.ok) throw new Error(v.error);
+    const dest = dir('user', kind, id + (kind === 'gc' ? '.txt' : '.pnach'));
+    ensure(path.dirname(dest));
+    fs.writeFileSync(dest, v.text, 'utf8');
+    return { id, kind, path: dest };
+  }
+  function removeUserCode(platform, id) {
+    const kind = platform === 'gamecube' ? 'gc' : 'ps2';
+    const f = dir('user', kind, id + (kind === 'gc' ? '.txt' : '.pnach'));
+    if (fs.existsSync(f)) fs.unlinkSync(f);
+  }
+  const hasUserCode = (platform, id) =>
+    !!id && fs.existsSync(dir('user', platform === 'gamecube' ? 'gc' : 'ps2', id + (platform === 'gamecube' ? '.txt' : '.pnach')));
 
   function hasPs2Cache() {
     try { return fs.readdirSync(dir('ps2')).some((f) => parsePnachName(f)); } catch (e) { return false; }
@@ -150,6 +206,8 @@ function create({ cacheDir, fetchBuffer, now = () => Date.now() }) {
     const kind = platform === 'gamecube' ? 'gc' : 'ps2';
     const ext = kind === 'gc' ? '.txt' : '.pnach';
     if (kind === 'ps2') return ps2Files(id)[0] || null;
+    const mine = dir('user', kind, id + ext);
+    if (fs.existsSync(mine)) return mine;
     const local = dir(kind, id + ext);
     if (fs.existsSync(local)) return local;
     const idx = readIndex();
@@ -168,13 +226,16 @@ function create({ cacheDir, fetchBuffer, now = () => Date.now() }) {
     const kind = platform === 'gamecube' ? 'gc' : 'ps2';
     const ext = kind === 'gc' ? '.txt' : '.pnach';
     const idx = readIndex();
-    const has = (x) => (kind === 'ps2' ? ps2Files(x).length > 0 : fs.existsSync(dir(kind, x + ext)) || !!(idx[kind] && idx[kind][x]));
+    const has = (x) => (kind === 'ps2' ? ps2Files(x).length > 0
+      : fs.existsSync(dir('user', kind, x + ext)) || fs.existsSync(dir(kind, x + ext)) || !!(idx[kind] && idx[kind][x]));
     const exact = !!id && has(id);
     const others = [];
     if (kind === 'gc' && id) {
       const prefix = id.slice(0, 3);
       const known = new Set([...Object.keys(idx.gc || {})]);
-      try { fs.readdirSync(dir('gc')).forEach((f) => known.add(f.replace(/\.txt$/, ''))); } catch (e) { /* bos */ }
+      for (const d of [dir('gc'), dir('user', 'gc')]) {
+        try { fs.readdirSync(d).forEach((f) => known.add(f.replace(/\.txt$/, ''))); } catch (e) { /* bos */ }
+      }
       for (const k of known) {
         if (k !== id && k.startsWith(prefix) && /^[A-Z0-9]{6}$/.test(k)) others.push(gcRegion(k));
       }
@@ -182,7 +243,7 @@ function create({ cacheDir, fetchBuffer, now = () => Date.now() }) {
     return { exact, otherRegions: [...new Set(others)] };
   }
 
-  return { updateIndex, getCodeFile, ps2Files, hasPs2Cache, availability, readIndex, cacheDir };
+  return { updateIndex, getCodeFile, ps2Files, hasPs2Cache, availability, readIndex, cacheDir, saveUserCode, removeUserCode, hasUserCode };
 }
 
-module.exports = { create, readZipEntries, gcRegion, ps2Region, parsePnachName, pnachGroups, isFpsGroup, DEFAULT_PCSX2_ZIP };
+module.exports = { create, validGecko, validPnach, readZipEntries, gcRegion, ps2Region, parsePnachName, pnachGroups, isFpsGroup, DEFAULT_PCSX2_ZIP };

@@ -23,3 +23,7 @@ Bu klasoru kendi GitHub deponun kokune koy (ucretsiz, public). Sonra RetroHub > 
 - Gecko (.txt): istege bagli "$Kod Adi" satiri, ardindan "0XXXXXXX 0XXXXXXX" hex satirlari.
 - PCSX2 (.pnach): standart pnach dosyasi.
 Kodlari dogruladigin kaynaktan al; bu sablonda hicbir kod yok, uydurma kod eklenmedi.
+
+## Otomatik index
+Dosyaları ekledikten sonra: `node tools/make-index.js codes-repo` (proje kökünden) index.json'u üretir ve `version`'ı artırır.
+Kod kaynağı olarak Dolphin Wiki (oyun sayfaları) ve Dolphin/PCSX2 forumları kullanılabilir; her kodu **kendi bölgesinin ID/CRC adıyla** kaydet.

@@ -27,6 +27,7 @@ const gradle = path.join(android, 'app', 'build.gradle');
 let g = fs.readFileSync(gradle, 'utf8');
 if (!g.includes('androidx.documentfile')) {
   g = g.replace(/dependencies\s*\{/, 'dependencies {\n    implementation "androidx.documentfile:documentfile:1.0.1"');
+  if (!g.includes('androidx.documentfile')) throw new Error('app/build.gradle icinde dependencies blogu bulunamadi');
   fs.writeFileSync(gradle, g);
 }
 
@@ -40,6 +41,7 @@ if (!m.includes('<queries>')) {
     </queries>
 
     <application`);
+  if (!m.includes('<queries>')) throw new Error('AndroidManifest.xml icinde <application> bulunamadi');
   fs.writeFileSync(manifestPath, m);
 }
 console.log('Android kurulumu tamam.');

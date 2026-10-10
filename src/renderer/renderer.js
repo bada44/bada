@@ -56,6 +56,7 @@ function toast(message, type = 'info') {
 // buttons: [{label, value, primary}] ; ilk dugme odakta, B/Esc = null
 function ask(title, text, buttons = [{ label: 'Tamam', value: true, primary: true }]) {
   return new Promise((resolve) => {
+    $('#modalInput').classList.add('hidden');
     $('#modalTitle').textContent = title;
     $('#modalText').textContent = text;
     const box = $('#modalButtons');
@@ -72,7 +73,29 @@ function ask(title, text, buttons = [{ label: 'Tamam', value: true, primary: tru
     box.querySelector('button')?.focus();
   });
 }
+// Metin girisli pencere (kod yapistirma). Kaydet -> metin, Vazgec/B -> null.
+function askText(title, text, placeholder = '') {
+  return new Promise((resolve) => {
+    $('#modalTitle').textContent = title;
+    $('#modalText').textContent = text;
+    const ta = $('#modalInput');
+    ta.value = ''; ta.placeholder = placeholder; ta.classList.remove('hidden');
+    const box = $('#modalButtons');
+    box.innerHTML = '';
+    for (const [label, save, primary] of [['Kaydet', true, true], ['Vazgeç', false, false]]) {
+      const b = document.createElement('button');
+      b.className = 'btn focusable' + (primary ? ' primary' : '');
+      b.textContent = label;
+      b.addEventListener('click', () => closeModal(save ? ta.value : null));
+      box.appendChild(b);
+    }
+    state.modalResolve = resolve;
+    $('#modal').classList.remove('hidden');
+    ta.focus();
+  });
+}
 function closeModal(value) {
+  $('#modalInput').classList.add('hidden');
   $('#modal').classList.add('hidden');
   const r = state.modalResolve; state.modalResolve = null;
   if (r) r(value ?? null);
@@ -265,7 +288,8 @@ async function openDrawer(gameId) {
       ${isMobile() ? '' : `<button class="btn focusable" data-d="fps">⚡ Oto FPS: ${g.autoFps !== false ? 'AÇIK' : 'KAPALI'}</button>`}
       ${isMobile() ? '' : `<button class="btn focusable" data-d="patch">🩹 Türkçe yama kur (dosya seç)</button>
       ${g.patched ? '<button class="btn danger focusable" data-d="restore">↩ Orijinale döndür</button>' : ''}
-      <button class="btn focusable" data-d="code">🧩 Elle kod ekle (ileri düzey)</button>`}
+      <button class="btn focusable" data-d="paste">📋 60 FPS kodu yapıştır</button>
+      <button class="btn focusable" data-d="code">🧩 Elle kod ekle (dosyadan)</button>`}
       <button class="btn focusable" data-d="close"><span class="key">B</span> Kapat</button>
     </div>`;
   drawer.classList.remove('hidden');
@@ -307,6 +331,21 @@ async function drawerAction(action, g) {
       if (!(await confirmBox('Orijinale dön', 'Oyun yamasız haline döndürülsün mü?'))) return;
       await api.patch.restore(g.id);
       await loadLibrary(g.id); return refreshDetail(g.id);
+    }
+    if (action === 'paste') {
+      const gc = g.platform === 'gamecube';
+      const text = await askText(
+        gc ? 'GameCube 60 FPS kodu yapıştır' : 'PS2 .pnach içeriğini yapıştır',
+        (gc
+          ? 'Dolphin Wiki veya forumdan TEK bir Gecko kodu yapıştır ($Ad satırı + 0XXXXXXX 0XXXXXXX satırları). '
+          : 'Yamanın .pnach dosya içeriğini yapıştır (patch=... satırları). ')
+        + 'Kod bu oyunun tam ID/CRC değerine bağlanır ve oyun açılırken otomatik kurulur. Kodu mutlaka bu oyunun kendi bölgesinden (örn. USA) al; yanlış bölge oyunu çökertir.',
+        gc ? '$60 FPS\n04XXXXXX 00000001' : 'gametitle=...\npatch=1,EE,...');
+      if (!text || !text.trim()) return;
+      const r = await api.codes.save(g.id, text);
+      toast(`Kod kaydedildi (${r.kind} ${r.id}, ${r.region}). Bu oyun açılırken otomatik kurulacak.`, 'ok');
+      await loadLibrary(g.id);
+      return refreshDetail(g.id);
     }
     if (action === 'code') {
       if (g.platform === 'gamecube') {
@@ -377,6 +416,31 @@ $('#codeRepoUrl').addEventListener('change', async (e) => {
   if (v && !/^https:\/\//i.test(v)) { toast('Adres https:// ile başlamalı', 'warn'); return; }
   state.settings = await api.settings.set({ codeRepoUrl: v });
 });
+$('#codesCoverage').addEventListener('click', async () => {
+  try {
+    const rows = await api.codes.coverage();
+    const usa = rows.filter((r) => r.region === 'USA');
+    const other = rows.length - usa.length;
+    if (!usa.length) {
+      return ask('Kapsama raporu', rows.length
+        ? `Kütüphanede USA bölgeli oyun bulunamadı (${rows.length} oyun başka bölgeden veya tanınamadı).`
+        : 'Kütüphane boş. Önce oyun klasörünü tara.');
+    }
+    const has = usa.filter((r) => r.status === 'var');
+    const miss = usa.filter((r) => r.status !== 'var');
+    const fmt = (r) => `• ${r.title} [${r.platform === 'gamecube' ? 'GC' : 'PS2'} ${r.id || '?'}]`;
+    const text = `USA oyunları: ${usa.length}\n60 FPS kodu/yaması VAR: ${has.length}\n60 FPS kodu YOK: ${miss.length}`
+      + (other ? `\n(Başka bölge/tanınmayan: ${other} oyun, rapora dahil değil)` : '')
+      + (miss.length ? `\n\nKodu olmayanlar:\n${miss.map(fmt).join('\n')}\n\nBunlar için kod bulunursa oyun sayfasındaki "60 FPS kodu yapıştır" ile eklenir.` : '\n\nHepsinde kod var.');
+    const act2 = await ask('USA 60 FPS kapsama raporu', text, [
+      { label: 'Eksik listeyi kopyala', value: 'copy', primary: true }, { label: 'Kapat', value: null }]);
+    if (act2 === 'copy') {
+      await navigator.clipboard.writeText(miss.map((r) => `${r.title} (${r.platform === 'gamecube' ? 'GameCube' : 'PS2'}, ${r.id || '?'})`).join('\n'));
+      toast('Eksik oyunların listesi kopyalandı', 'ok');
+    }
+  } catch (err) { ask('Rapor alınamadı', err.message); }
+});
+
 $('#codesRefresh').addEventListener('click', async () => {
   toast('Kodlar güncelleniyor...');
   await api.codes.refresh();
@@ -560,7 +624,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'F11') { e.preventDefault(); api.app.toggleFullscreen(); return; }
   if (state.playing) return;
   if (document.activeElement?.matches('input.editable')) { if (e.key === 'Escape' || e.key === 'Enter') document.activeElement.blur(); return; }
-  if (document.activeElement?.matches('select, input[type=range]')) return;
+  if (document.activeElement?.matches('select, input[type=range], textarea')) { if (e.key === 'Escape') closeModal(null); return; }
   setInputMode('kb');
   const typing = document.activeElement === $('#search') || document.activeElement === $('#sSearch');
   const searchBox = state.view === 'library' ? $('#sSearch') : $('#search');

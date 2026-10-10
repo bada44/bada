@@ -110,3 +110,26 @@ Switch (`.nsp`) desteklenmez (ayrı emülatör gerekir).
 - **Oyun açılmıyor:** Ayarlar → Emülatörler → yolu kontrol et.
 - **Gamepad görünmüyor:** Bir tuşa bas (tarayıcı kuralı gereği kontrolcü ilk tuşla uyanır).
 - **PCSX2 tam ekran açılmıyor:** Ayarlar'dan "Emülatörü tam ekran aç"ı kapat, PCSX2'nin kendi ayarını kullan.
+
+
+## ⚡ 60 FPS: gerçekçi beklenti (v1.4)
+**Hiçbir kaynak "tüm USA oyunlarını 60 FPS yap" demiyor ve bunu yapan evrensel bir yöntem yok.** 60 FPS, oyunun
+kendi koduna yazılan oyuna özel bir yamadır; Dolphin forumunun kendisi de "tam bir liste yok" der. Uygulamanın yaptığı:
+
+| | Kaynak | Kapsam |
+|---|---|---|
+| PS2 | PCSX2 resmi yama paketi + topluluk (PeterDelta) 50/60 FPS yamaları, CRC ile otomatik | Yüzlerce oyun, USA dahil (kısmi; listenin büyük kısmı PAL) |
+| GameCube | Kendi kod deponun `index.json`'u veya oyunun sayfasından **kod yapıştır** | Sen ekledikçe büyür; hazır toplu liste yok |
+
+- **Kapsama raporu:** Ayarlar → FPS ve Kodlar → *USA 60 FPS kapsama raporu*. Kütüphanendeki USA oyunlarının
+  hangisinde kod var, hangisinde yok gösterir; eksik listeyi kopyalayabilirsin.
+- **Kod yapıştır:** Oyun sayfasında *60 FPS kodu yapıştır*. Dolphin Wiki/forumdan tek bir Gecko kodunu (veya PS2 için `.pnach`
+  içeriğini) yapıştırırsın; **o oyunun tam ID/CRC değerine** bağlanır ve her açılışta otomatik kurulur. Başka bölgeye
+  asla uygulanmaz (yanlış bölge kodu oyunu çökertir). Birden fazla kod yapıştırırsan reddedilir (kodlar karışmasın diye).
+- Kodların yan etkisi olabilir (ses bozulması, efekt hataları, bazı Dolphin sürümlerinde çalışmama). Uygulama bunları
+  test edemez; sorun olursa oyun sayfasından *Oto FPS: KAPALI* yap.
+- Kod olmasa da her oyunda **performans profili** (Dolphin CPU x1.5, hızlı disk) uygulanır: bu, 30 FPS'i 60 yapmaz,
+  emülatör yavaşlığından gelen düşüşleri giderir.
+
+## GitHub ve Android
+Bkz. [docs/GITHUB.md](docs/GITHUB.md) (depoya koyma, otomatik .exe/.apk derleme, Releases) ve [mobile/README.md](mobile/README.md).

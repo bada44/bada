@@ -222,6 +222,36 @@ ipcMain.handle('game:setAutoFps', (_e, { id, value }) => updateGame(id, { autoFp
 ipcMain.handle('game:identify', (_e, id) => fps.identify(getGame(id)));
 ipcMain.handle('codes:refresh', () => refreshCodes(true));
 
+// Kullanicinin yapistirdigi kodu bu oyunun TAM ID/CRC'sine baglayip kaydeder (baska bolgeye uygulanmaz).
+ipcMain.handle('codes:save', (_e, { gameId, text }) => {
+  const g = getGame(gameId);
+  const info = fps.identify(g);
+  if (!info.id) throw new Error('Oyunun kimligi okunamadi' + (info.error ? ': ' + info.error : '') + '.');
+  const r = codeRepo.saveUserCode(g.platform, info.id, text);
+  return { id: r.id, region: info.region, kind: info.kind };
+});
+ipcMain.handle('codes:remove', (_e, gameId) => {
+  const g = getGame(gameId);
+  const info = fps.identify(g);
+  if (info.id) codeRepo.removeUserCode(g.platform, info.id);
+  return true;
+});
+
+// Kapsama raporu: kutuphanedeki her oyun icin 60 FPS kodu var mi? (bolgeye gore)
+ipcMain.handle('codes:coverage', () => {
+  const rows = [];
+  for (const g of Object.values(store.get('games'))) {
+    let i = {};
+    try { i = fps.identify(g); } catch (e) { /* okunamayan imaj */ }
+    rows.push({
+      title: g.title, platform: g.platform, region: i.region || 'Bilinmiyor', id: i.id || null,
+      status: !i.id ? 'bilinmiyor' : (i.codeStatus === 'var' ? 'var' : 'yok'),
+      mine: !!(i.id && codeRepo.hasUserCode(g.platform, i.id))
+    });
+  }
+  return rows;
+});
+
 // ---------- Oynatma ----------
 ipcMain.handle('game:play', async (_e, gameId) => {
   const game = getGame(gameId);

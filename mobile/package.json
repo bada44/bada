@@ -1,6 +1,6 @@
 {
   "name": "retrohub-mobile",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "description": "RetroHub Android (Capacitor) - ayni arayuz, emulatoru Android'de baslatir",
   "scripts": {

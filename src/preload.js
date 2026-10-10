@@ -32,6 +32,11 @@ contextBridge.exposeInMainWorld('retrohub', {
     installGecko: (gameId, codeFilePath) => inv('cheats:installGecko', { gameId, codeFilePath }),
     installPnach: (pnachFilePath) => inv('cheats:installPnach', { pnachFilePath })
   },
-  codes: { refresh: () => inv('codes:refresh') },
+  codes: {
+    refresh: () => inv('codes:refresh'),
+    save: (gameId, text) => inv('codes:save', { gameId, text }),
+    remove: (gameId) => inv('codes:remove', gameId),
+    coverage: () => inv('codes:coverage')
+  },
   cloud: { syncNow: () => inv('cloud:syncNow'), localSaves: () => inv('cloud:localSaves') }
 });

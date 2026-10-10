@@ -278,7 +278,8 @@ async function openGamePage(gameId) {
         <div class="p-col">
           <button class="btn" data-p="patch">🩹 Türkçe yama kur (dosya seç)</button>
           ${g.patched ? '<button class="btn danger" data-p="restore">↩ Orijinale döndür</button>' : ''}
-          <button class="btn" data-p="code">🧩 Elle kod ekle</button>
+          <button class="btn" data-p="paste">📋 60 FPS kodu yapıştır</button>
+          <button class="btn" data-p="code">🧩 Elle kod ekle (dosyadan)</button>
         </div>
       </div>`}
     </div>`;
