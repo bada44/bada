@@ -38,5 +38,10 @@ contextBridge.exposeInMainWorld('retrohub', {
     remove: (gameId) => inv('codes:remove', gameId),
     coverage: () => inv('codes:coverage')
   },
-  cloud: { syncNow: () => inv('cloud:syncNow'), localSaves: () => inv('cloud:localSaves') }
+  cloud: { syncNow: () => inv('cloud:syncNow'), localSaves: () => inv('cloud:localSaves') },
+  catalog: {
+    load: () => inv('catalog:load'),
+    open: (url) => inv('catalog:open', url),
+    openStore: () => inv('catalog:openStore')
+  }
 });
