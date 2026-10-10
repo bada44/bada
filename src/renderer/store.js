@@ -65,4 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('storeModal').classList.add('hidden');
     }
   });
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 529d6bf1e8d0230219a2a2051d318d7dd3798712
