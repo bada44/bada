@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' file: data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' file: data: https:; media-src 'self' file:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'" />
   <title>RetroHub</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="enhanced.css" />
   <style>
-    /* Mağaza modal */
     #storeModal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; }
     #storeModal.hidden { display: none; }
     .store-box { width: 90%; max-width: 1000px; height: 85%; background: #1b2838; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
@@ -46,6 +46,7 @@
       <input id="search" type="search" placeholder="Ara ( / )" />
       <span id="padStatus" class="pad-status" title="Kontrolcü">🎮</span>
       <span id="clock" class="clock"></span>
+      <button id="btnMusic" class="icon-btn" title="Müzik aç/kapat">🔊</button>
       <button id="btnStore" class="icon-btn" title="Mağaza" onclick="window.openStore()">🛒</button>
       <button id="btnLibrary" class="icon-btn" title="Kütüphane görünümü">🗂</button>
       <button id="btnRandom" class="icon-btn" title="Şanslı oyun">🎲</button>
@@ -245,5 +246,6 @@
   <script src="steam.js"></script>
   <script src="renderer.js"></script>
   <script src="store.js"></script>
+  <script src="wii-music.js"></script>
 </body>
 </html>
