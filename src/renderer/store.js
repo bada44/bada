@@ -1,51 +1,68 @@
 // src/renderer/store.js
-let allGames = [];
+// Mağaza modalı: uygulama içinde açar, ayrı pencere yok.
 
-async function loadCatalog() {
-  try {
-    const data = await window.retrohub.catalog.load();
-    allGames = data.games || [];
-    render(allGames);
-  } catch (err) {
-    console.error('Katalog yuklenemedi:', err);
-    document.getElementById('games').innerHTML =
-      '<div class="empty">Katalog yuklenemedi: ' + err.message + '</div>';
+let storeGames = [];
+
+window.openStore = async function() {
+  const modal = document.getElementById('storeModal');
+  modal.classList.remove('hidden');
+  document.getElementById('storeSearch').value = '';
+
+  if (storeGames.length === 0) {
+    document.getElementById('storeList').innerHTML = '<div class="store-empty">Yükleniyor...</div>';
+    try {
+      const data = await window.retrohub.catalog.load();
+      storeGames = data.games || [];
+    } catch (e) {
+      document.getElementById('storeList').innerHTML =
+        '<div class="store-empty">Katalog yüklenemedi: ' + e.message + '</div>';
+      return;
+    }
   }
-}
+  renderStore(storeGames);
+};
 
-function render(games) {
-  const container = document.getElementById('games');
+function renderStore(games) {
+  const list = document.getElementById('storeList');
   if (!games.length) {
-    container.innerHTML = '<div class="empty">Oyun bulunamadi.</div>';
+    list.innerHTML = '<div class="store-empty">Oyun bulunamadı.</div>';
     return;
   }
-  container.innerHTML = games.map(g => `
-    <div class="game-card">
-      <img src="${g.cover}" alt="${g.title}">
-      <div class="game-info">
-        <div class="game-title">${g.title}</div>
-        <div class="game-meta">
-          <span>${g.size || '?'}</span>
-          <span>⭐ ${g.rating || '?'}/5</span>
-        </div>
+  list.innerHTML = games.map(g => `
+    <div class="store-item">
+      <img src="${g.cover}" alt="" onerror="this.style.visibility='hidden'">
+      <div class="info">
+        <div class="name">${g.title}</div>
+        <div class="meta">${g.size || '?'} &nbsp;·&nbsp; ⭐ ${g.rating || '?'}/5</div>
       </div>
-      <button class="download-btn" data-url="${g.url}">INDIR</button>
+      <button class="dl" data-url="${g.url}">İNDİR</button>
     </div>
   `).join('');
 
-  document.querySelectorAll('.download-btn').forEach(btn => {
+  list.querySelectorAll('.dl').forEach(btn => {
     btn.addEventListener('click', async () => {
       const url = btn.dataset.url;
-      btn.textContent = 'Aciliyor...';
+      btn.textContent = 'Açılıyor...';
       await window.retrohub.catalog.open(url);
-      setTimeout(() => { btn.textContent = 'INDIR'; }, 1000);
+      setTimeout(() => { btn.textContent = 'İNDİR'; }, 1000);
     });
   });
 }
 
-document.getElementById('search').addEventListener('input', (e) => {
-  const q = e.target.value.toLowerCase();
-  render(allGames.filter(g => g.title.toLowerCase().includes(q)));
-});
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('storeClose').addEventListener('click', () => {
+    document.getElementById('storeModal').classList.add('hidden');
+  });
 
-loadCatalog();
+  document.getElementById('storeSearch').addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    renderStore(storeGames.filter(g => g.title.toLowerCase().includes(q)));
+  });
+
+  // ESC ile kapat
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !document.getElementById('storeModal').classList.contains('hidden')) {
+      document.getElementById('storeModal').classList.add('hidden');
+    }
+  });
+});
