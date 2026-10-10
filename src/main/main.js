@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, net } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, net } = require('electron');const { setupCatalog } = require('./catalog');
 const path = require('path');
 const fs = require('fs');
 
@@ -47,6 +47,7 @@ if (!gotLock) {
     if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.focus(); }
   });
   app.whenReady().then(() => {
+      setupCatalog();
     createWindow();
     paths.configure(store.get('settings'));
     initCodeRepo();
