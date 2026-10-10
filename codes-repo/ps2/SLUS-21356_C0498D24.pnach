@@ -1,0 +1,21 @@
+gametitle=Tom Clancy's Splinter Cell 4: Double Agent * NTSC-U * SLUS-21356 * C0498D24
+//This game has multiple CRC shifts depending on game mode.
+
+[Widescreen 16:9]
+gsaspectratio=16:9
+author=nemesis2000
+
+[Widescreen 16:10]
+gsaspectratio=Stretch
+author=nemesis2000, converted by pgert
+description=Combine with 'Widescreen 16:9'
+
+[Widescreen 15:10]
+gsaspectratio=Stretch
+author=nemesis2000, converted by pgert
+description=Combine with 'Widescreen 16:9'
+
+// ==========
+// Game can run at 60 FPS as opposed to 30 with an EE cycle rate of 300%.
+// Use at your own risk.
+// ==========

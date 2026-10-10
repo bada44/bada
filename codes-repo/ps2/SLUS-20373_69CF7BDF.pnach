@@ -1,0 +1,23 @@
+gametitle=Men in Black II - Alien Escape NTSC-U SLUS-20373 69CF7BDF
+
+//[Widescreen 16:9]
+//gsaspectratio=16:9
+//author=Arapapa
+
+//Widescreen 16:9
+
+//X-Fov
+//patch=1,EE,003a9c2c,word,3c02bf40 //3c02bf80
+
+//Background effect fix
+//patch=1,EE,001a6fac,word,3c033f2b //3c033f00
+//patch=1,EE,001a7018,word,3c033f2b //3c033f00
+//causes glitches in textures
+
+[60 FPS]
+author=Gabominated
+description=Might need EE Overclock (180%).
+patch=0,EE,003CB5C0,word,24420002
+patch=0,EE,00180D20,word,3C024270
+patch=0,EE,00288CC8,word,3c023F55
+patch=0,EE,00288CB0,word,3c02BF55

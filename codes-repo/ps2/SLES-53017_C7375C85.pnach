@@ -1,0 +1,22 @@
+gametitle=TMNT Teenage Mutant Ninja Turtles 2 - Battle Nexus (PAL-M5) SLES-53017 C7375C85
+
+[Widescreen 16:9]
+gsaspectratio=16:9
+author=ElHecht
+description=Renders the game in 16:9 aspect ratio.
+patch=1,EE,00234710,word,460d6302
+patch=1,EE,00234714,word,460d6b42
+
+[50/60 FPS]
+author=PeterDelta
+description=Might need EE Overclock (130%).
+patch=0,EE,001363A4,word,24040001
+patch=0,EE,00135C50,word,28A10002
+
+[480p Mode]
+author=PeterDelta
+description=SDTV 480p mode when selecting 60 Hz
+patch=1,EE,E0030000,extended,00558788
+patch=1,EE,201009B4,extended,24110000
+patch=1,EE,201009B8,extended,24120050
+patch=1,EE,201009C4,extended,24130001
