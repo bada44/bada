@@ -36,11 +36,7 @@
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const on = window.toggleMusic();
-<<<<<<< HEAD
         btn.classList.toggle('off', !on);
-=======
-        btn.textContent = on ? '🔊' : '🔇';
->>>>>>> 529d6bf1e8d0230219a2a2051d318d7dd3798712
       });
     }
   });
