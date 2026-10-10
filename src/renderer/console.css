@@ -305,3 +305,152 @@ body[data-view="bigpicture"] #hints { display: none; }
     font-size: calc(var(--u) * 11) !important;
   }
 }
+/* ============ MOBİL TAM DÜZEN ============ */
+@media (max-width: 820px) {
+  :root { --u: calc(100vw / 400); }
+
+  body[data-view="bigpicture"] #search { display: none !important; }
+
+  body[data-view="bigpicture"] .topbar {
+    left: calc(var(--u) * 8);
+    right: calc(var(--u) * 8);
+    top: calc(var(--u) * 8 + env(safe-area-inset-top));
+    padding: 0 calc(var(--u) * 12);
+    height: calc(var(--u) * 46);
+    border-radius: 999px;
+    gap: calc(var(--u) * 6);
+  }
+  body[data-view="bigpicture"] .brand {
+    margin-right: calc(var(--u) * 10);
+    font-size: calc(var(--u) * 14);
+    flex-shrink: 0;
+  }
+  body[data-view="bigpicture"] #tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+  }
+  body[data-view="bigpicture"] #tabs::-webkit-scrollbar { display: none; }
+  body[data-view="bigpicture"] .tab {
+    padding: 0 calc(var(--u) * 10);
+    font-size: calc(var(--u) * 11);
+    height: calc(var(--u) * 28);
+    flex-shrink: 0;
+  }
+  body[data-view="bigpicture"] .sync-pill,
+  body[data-view="bigpicture"] .clock,
+  body[data-view="bigpicture"] #btnFull { display: none !important; }
+  body[data-view="bigpicture"] .top-right {
+    gap: calc(var(--u) * 4);
+    flex-shrink: 0;
+  }
+  body[data-view="bigpicture"] .top-right .icon-btn {
+    width: calc(var(--u) * 32);
+    height: calc(var(--u) * 32);
+  }
+  body[data-view="bigpicture"] .top-right .icon-btn svg {
+    width: calc(var(--u) * 18);
+    height: calc(var(--u) * 18);
+  }
+
+  body[data-view="bigpicture"] #home {
+    padding-top: calc(var(--u) * 66 + env(safe-area-inset-top));
+  }
+  body[data-view="bigpicture"] .hero {
+    padding: 0 0 calc(var(--u) * 24) calc(var(--u) * 20);
+  }
+  body[data-view="bigpicture"] #heroTitle {
+    font-size: calc(var(--u) * 30);
+    max-width: 92vw;
+  }
+  body[data-view="bigpicture"] .hero-actions {
+    gap: calc(var(--u) * 8);
+    flex-wrap: wrap;
+  }
+  body[data-view="bigpicture"] .hero-actions .btn.big {
+    height: calc(var(--u) * 34);
+    padding: 0 calc(var(--u) * 16);
+    font-size: calc(var(--u) * 12.5);
+  }
+
+  body[data-view="bigpicture"] .rail {
+    padding: calc(var(--u) * 12) 0 calc(var(--u) * 40) calc(var(--u) * 18);
+    gap: calc(var(--u) * 14);
+  }
+  body[data-view="bigpicture"] .tile {
+    width: calc(var(--u) * 110);
+    height: calc(var(--u) * 142);
+  }
+
+  /* BOŞ DURUM (hoş geldin) mobil */
+  .empty {
+    padding: calc(var(--u) * 16) !important;
+    text-align: center;
+  }
+  .empty h2 {
+    font-size: calc(var(--u) * 20) !important;
+    margin-bottom: calc(var(--u) * 14) !important;
+  }
+  .steps {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: calc(var(--u) * 12) !important;
+  }
+  .step {
+    padding: calc(var(--u) * 18) !important;
+    border-radius: calc(var(--u) * 14) !important;
+  }
+  .step b {
+    font-size: calc(var(--u) * 22) !important;
+    width: calc(var(--u) * 38) !important;
+    height: calc(var(--u) * 38) !important;
+  }
+  .step p {
+    font-size: calc(var(--u) * 14) !important;
+    margin: calc(var(--u) * 8) 0 calc(var(--u) * 12) !important;
+  }
+  .step button {
+    width: 100%;
+    padding: calc(var(--u) * 12) !important;
+    font-size: calc(var(--u) * 14) !important;
+  }
+
+  /* AYARLAR MOBİL */
+  .settings-head {
+    padding: calc(var(--u) * 12) calc(var(--u) * 14) !important;
+    padding-top: calc(var(--u) * 12 + env(safe-area-inset-top)) !important;
+  }
+  .settings-head h2 { font-size: calc(var(--u) * 18) !important; }
+  .set-nav {
+    display: flex !important;
+    overflow-x: auto !important;
+    gap: 6px !important;
+    padding: calc(var(--u) * 8) !important;
+    scrollbar-width: none;
+  }
+  .set-nav::-webkit-scrollbar { display: none; }
+  .set-nav button {
+    flex-shrink: 0;
+    padding: calc(var(--u) * 8) calc(var(--u) * 14) !important;
+    font-size: calc(var(--u) * 12) !important;
+    border-radius: 999px !important;
+    white-space: nowrap;
+  }
+  .settings-body {
+    padding: calc(var(--u) * 12) !important;
+    padding-bottom: calc(var(--u) * 20 + env(safe-area-inset-bottom)) !important;
+  }
+  .card {
+    padding: calc(var(--u) * 14) !important;
+    margin-bottom: calc(var(--u) * 12) !important;
+  }
+  .card h3 { font-size: calc(var(--u) * 15) !important; }
+  .row { flex-direction: column !important; align-items: stretch !important; gap: calc(var(--u) * 8) !important; }
+  .row label { font-size: calc(var(--u) * 13) !important; }
+  .pick { flex-direction: column !important; gap: calc(var(--u) * 6) !important; }
+  .pick input, .pick button { font-size: calc(var(--u) * 13) !important; }
+
+  /* MAĞAZA MOBİL */
+  #storeModal .store-box { width: 96% !important; height: 92% !important; }
+  .store-list { grid-template-columns: 1fr !important; }
+}
