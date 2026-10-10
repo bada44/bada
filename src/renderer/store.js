@@ -1,12 +1,16 @@
 // src/renderer/store.js
-const { ipcRenderer } = require('electron');
-
 let allGames = [];
 
 async function loadCatalog() {
-  const data = await ipcRenderer.invoke('catalog:load');
-  allGames = data.games || [];
-  render(allGames);
+  try {
+    const data = await window.retrohub.catalog.load();
+    allGames = data.games || [];
+    render(allGames);
+  } catch (err) {
+    console.error('Katalog yuklenemedi:', err);
+    document.getElementById('games').innerHTML =
+      '<div class="empty">Katalog yuklenemedi: ' + err.message + '</div>';
+  }
 }
 
 function render(games) {
@@ -33,7 +37,7 @@ function render(games) {
     btn.addEventListener('click', async () => {
       const url = btn.dataset.url;
       btn.textContent = 'Aciliyor...';
-      await ipcRenderer.invoke('catalog:open', url);
+      await window.retrohub.catalog.open(url);
       setTimeout(() => { btn.textContent = 'INDIR'; }, 1000);
     });
   });
