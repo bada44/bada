@@ -6,7 +6,6 @@ let pageSig = '';
 
 function initSteam() {
   state.view = state.settings.viewMode || 'bigpicture';
-  if (isMobile() && state.view !== 'library') state.view = 'library';
   state.sort = state.settings.sortMode || 'name';
   $('#sSort').value = state.sort;
   const size = Number(state.settings.tileSize) || 170;
