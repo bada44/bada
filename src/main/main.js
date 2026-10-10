@@ -49,6 +49,14 @@ if (!gotLock) {
   });
   app.whenReady().then(() => {
     setupCatalog();
+        // Android'de sabit ROM klasörü
+    if (process.env.RETROHUB_ANDROID === '1' || process.platform === 'android') {
+      const s = store.get('settings') || {};
+      s.gcFolder = '/storage/emulated/0/RetroHub/ROMs/gamecube';
+      s.ps2Folder = '/storage/emulated/0/RetroHub/ROMs/ps2';
+      s.autoScan = true;
+      store.set('settings', s);
+    }
 
     // --- Mağaza penceresi ---
     ipcMain.handle('catalog:openStore', () => {
